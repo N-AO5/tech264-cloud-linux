@@ -8,7 +8,18 @@ add a auto table of contents = "ctrl shift p" to add a command to vsc and search
 # Table of contents
 - [Scripting](#scripting)
     - [Quick info](#quick-info)
+- [Table of contents](#table-of-contents)
   - [scripting vs programming](#scripting-vs-programming)
+  - [Test for argument example:](#test-for-argument-example)
+  - [Linux commands](#linux-commands)
+  - [Rules for Cloud](#rules-for-cloud)
+  - [Azure VM labelled diagram](#azure-vm-labelled-diagram)
+  - [Create an Azure test VNet](#create-an-azure-test-vnet)
+- [To delete a Azure VNet](#to-delete-a-azure-vnet)
+  - [Make our actual VNet](#make-our-actual-vnet)
+  - [Create a ssh key pair](#create-a-ssh-key-pair)
+  - [Creating a VM](#creating-a-vm)
+
 
 
 ## scripting vs programming 
@@ -143,5 +154,5 @@ MUST BE PRIVATE - private "key" on local machine and public "padlock" on azure
 15. tag name as owner
 16. click create
     
- 
+## Creating a VM 
 
