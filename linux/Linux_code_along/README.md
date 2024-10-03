@@ -1,27 +1,27 @@
 
 
-- [Navigating files and folders](#navigating-files-and-folders)
+- [Navigating Files and Folders](#navigating-files-and-folders)
   - [Installing a package \[FIRST THING TO DO WHEN U OPEN YOUR VM\]](#installing-a-package-first-thing-to-do-when-u-open-your-vm)
-  - [Running multiple commands as the Super User](#running-multiple-commands-as-the-super-user)
-- [Making a shell (BASH) script](#making-a-shell-bash-script)
+  - [Running Multiple Commands as the Super User](#running-multiple-commands-as-the-super-user)
+- [Making a shell (BASH) Script](#making-a-shell-bash-script)
 - [Environment Variables](#environment-variables)
-    - [Set a variable (for a script)](#set-a-variable-for-a-script)
-    - [Set an environment variable](#set-an-environment-variable)
-    - [Set a persistent variable](#set-a-persistent-variable)
+    - [Set a Variable (for a script)](#set-a-variable-for-a-script)
+    - [Set an Environment Variable](#set-an-environment-variable)
+    - [Set a Persistent Variable](#set-a-persistent-variable)
 - [Managing Processes](#managing-processes)
-  - [User processes](#user-processes)
-  - [System processes](#system-processes)
-    - [Running a process](#running-a-process)
-    - [Killing a process](#killing-a-process)
+  - [User Processes](#user-processes)
+  - [System Processes](#system-processes)
+    - [Running a Process](#running-a-process)
+    - [Killing a Process](#killing-a-process)
 
-### what is Linux
+### what is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
 - We're using linux for it flexibility, cheaper price, stable os, scales up very easily.
 - Often used for DevOps
 - ubuntu is just one distribution (like one flavour/version of linux)
 - BASH is a shell interprets the linux commands 
 - 
-### Linux commands
+### Linux Commands
 - ```ls```lists the files and direc
 - ``` cd``` followed by the name of the direc to open a direc
 - ```ls -a``` lists hidden files too
@@ -54,9 +54,9 @@
 - ```nano *file name*``` text editor
   - ctrl s - saves
   - ctrl x - exit
-- 
+
  
-## Navigating files and folders
+## Navigating Files and Folders
 - ```curl *a website link* --output *name of file include the file extension*``` download and save file from a website of choice as the name you choose
 - ```wget *a website link* -O *name of file, include the file extension*``` download and save file from a website of choice as the name you choose
 - ``` file *file name, include file ext*``` tells you the type of file it is
@@ -79,13 +79,13 @@ root in linux is the super user- all permissions
   -  eg. tree package (allows you to see files ina different way to ls) which does this: ![alt text](image-2.png)
 - ``` sudo apt upgrade -y```upgrade all the packages installed CAN BREAK OS (sys software may need/already running a specific version of a specific package)
 
-### Running multiple commands as the Super User
+### Running Multiple Commands as the Super User
 - ``` cd /``` cd into the top of the direc tree, root direc [BE CAREFUL CAN BREAK]
 - there is a *root* folder for the SU
 - ``` sudo su``` log in as rootuser to access the *root* folder
 - *exit* to log out
 
-## Making a shell (BASH) script
+## Making a shell (BASH) Script
 - make a files names "provision" 
   - can use nano ``` nano provision.sh``` 
   - ``` .sh ``` means shell
@@ -127,14 +127,14 @@ This environment variable we are setting uo contains info about where to go to f
  - ```printenv``` prints out environment variables onto the screen
 - ```printenv *env variable name* ``` print out just one env variable, match the caplocks ![alt text](image-6.png)
   
-#### Set a variable (for a script)
+#### Set a Variable (for a script)
 - use caplocks to write the variable name then "=" ![alt text](image-7.png)
 - to see a normal variable use ``` echo $*variablename*``` ![alt text](image-8.png)
   
-#### Set an environment variable
+#### Set an Environment Variable
 - ```export *set the name and value*``` set like with a normal variable ![alt text](image-9.png)
   
-#### Set a persistent variable
+#### Set a Persistent Variable
 - To allow a env var to stay when you log out and log in - persistence
   - set env var in the ```.bashrc``` file in your home direc. that loads up every time you log in
   - so it will be set that the variable will still exist if you log in as that user
@@ -150,14 +150,14 @@ This environment variable we are setting uo contains info about where to go to f
 A process is a program that been loaded into memory (RAM) (not doing much)
 When running (executing a program) one core is needed, if multiple processes are running at the same time - moore cores are required
 
-### User processes
+### User Processes
 Processes that a user had run on a terminal - associated with a terminal session
 ![alt text](image-13.png)
 ^ this shows the user processes running, use the command ```ps```
 
 TTY is the terminal session ID ```pts/0``` means first terminal logged in
 
-### System processes
+### System Processes
 - To see ALL the processes use ``` ps -A``` 
 - ```ps -aux```shows ALL the information about ALL the processes
 - almost every process is started by another
@@ -167,14 +167,14 @@ TTY is the terminal session ID ```pts/0``` means first terminal logged in
 - shift + n shows the newest processes
 - shift + p shows the most processing power
 
-#### Running a process
+#### Running a Process
 - ```sleep *num"```sleep command causes a delay in seconds incase the previous command hasn't been fully configed yet- running in the foreground
 - ``` sleep *num* &``` running in the background
   - will give you a process id
    ![alt text](image-15.png)
 - ```jobs``` shows you processes![alt text](image-16.png)
 
-#### Killing a process
+#### Killing a Process
 - ctrl + z can stop a process in the foreground
 - ``` kill -1 *process id*``` hang up signal to gently stop a process
 - ``` kill *process id*``` terminate slightly harsher kill signal (level 15)
