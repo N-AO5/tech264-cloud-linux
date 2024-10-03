@@ -4,38 +4,33 @@
 ### The basics of Azure
 Azure is a microsoft cloud computing platform. Azure offers IaaS (virtual machine), PaaS (building, testing and deploying apps) and SaaS (microsoft 365).
 
-The services that Azure offers:
-- compute: Virtual machines, containers (e.g., Azure Kubernetes Service), and serverless computing (Azure Functions).
-- Storage: Scalable cloud storage for data, files, and databases, including Azure Blob Storage and Azure SQL Database.
-- Networking: Virtual networks, load balancers, VPN gateways for managing network infrastructure.
-- Databases: Managed databases, including SQL Database, Cosmos DB (NoSQL), and Azure Database for MySQL/PostgreSQL.
-- AI & Machine Learning: Pre-built APIs and tools like Azure Cognitive Services and Azure Machine Learning.
-- DevOps: Tools like Azure DevOps and GitHub integration to automate software development pipelines.
 
 
 ### Azure regions and availability zones: how they work and include up-to-date diagrams to help
 
-An Azure region is an area on the globe that Microsoft has at least one data center.
+- An Azure region is an area on the globe that Microsoft has at least one data center.
 
-These regions are to allow Microsoft to let their users deploy resources close to their location so there is 100% compliance to local regulations
+  - These regions are to allow Microsoft to let their users deploy resources close to their location so there is 100% compliance to local regulations.
 
-Availability zones are WITHIN a region, they are separate locations and each have a data center. These zones are designed to ensure high availability and protect resources from localized failures, like power outages or natural disasters.
+- Availability zones are WITHIN a region, they are separate locations and each have a data center. These zones are designed to ensure high availability and protect resources from localized failures, like power outages or natural disasters.
 
-When deploying Azure resources, you can choose a region, and within that region, you can deploy resources across Availability Zones. This ensures your app remains available even if one zone experiences an outage.
+  - When deploying Azure resources, you can choose a region, and within that region, you can deploy resources across Availability Zones. This ensures your app remains available even if one zone experiences an outage.
+  - Azure has 3 availability zones per region.
+  - Each availability zone has data centers which have independent power system, back sys, cooling sys and networking.
 
 ![alt text](image.png)
 
 ### How is Azure structured/organized?
+Every level provides a different scope bc we each scope can set different levels of access and policies 
 
 Azure organized hierarchically:
-1. Management Groups (company-wide governance)
-    - Subscriptions (billing and limits)
-        - Resource Groups (logical grouping of resources)
-            - Resources (e.g., virtual machines, databases)
-2. Regions (geographical locations with Availability Zones for fault tolerance)
-3. Azure AD (identity management with role-based access)
-4. Tags, Policies, and Blueprints (for organization and compliance)
+- Root Management Group (Azure Entra- the active direc, permissions and accounts are stored)
+  - Management Groups (company-wide governance- like folders, up to 6 levels with assigned limits)
+    - Subscriptions (billing - payment scheme, eg pay as you go) (and limits- eg 50 x VM same size, same region)
+        - Resource Groups (logical grouping of resources you intend to use)(can have multiple resource groups in one subscription)
+            - Resources (e.g., virtual machines, databases, VNet)
 
+![alt text](image-1.png)
 
 ### What types of services does Azure provide?
 
@@ -86,11 +81,14 @@ Azure organized hierarchically:
 
 
 ### Ways to access Azure?
+
+No matter how you access Azure, the background is the ARM (Azure Resource Manager) API
+
 - Azure portal
 - Azure command line
 - Azure powershell
 - Azure mobile apps
-- Azure RESTful APIs
+- Azure REST APIs
 - Azure resource manager
 - Software Development Kits (SDKs) and libraries
 
@@ -101,18 +99,18 @@ Azure is a cloud computing platform with a wide range of cloud services for buil
 Azure DevOps is a development tools and services focused on collaboration, continuous integration (CI), continuous delivery (CD), and DevOps practices.
 
 ### Why use the Azure Pricing Calculator?
+The default setting is NOT  the cheapest setting 
 
+1. Cost Estimation: Provides pricing for services based on usage.
+2. Budget Planning: Helps control cloud spending.
+3. Service Comparison: Compare costs of different services and regions.
+4. Customization: Tailor configurations for accurate cost projections.
+5. Cost Optimization: Identify savings through different options.
+6. Scenario Planning: Model different usage scenarios to predict costs.
 
-1. **Cost Estimation**: Provides pricing for services based on usage.
-2. **Budget Planning**: Helps control cloud spending.
-3. **Service Comparison**: Compare costs of different services and regions.
-4. **Customization**: Tailor configurations for accurate cost projections.
-5. **Cost Optimization**: Identify savings through different options.
-6. **Transparency**: Offers clear pricing with no hidden fees.
-7. **Scenario Planning**: Model different usage scenarios to predict costs.
+consider making your own azure account - you will learn bc you have to pay, check everything, be frugal
 
 ### Main takeaways  
-
 In the README.md, add + personalise the content with your own comments, "take-aways", things you've learnt. Supplement the content with extra research where you feel your understanding is weaker.
 
 Understand the content so you are ready to be asked interview questions on the topic
