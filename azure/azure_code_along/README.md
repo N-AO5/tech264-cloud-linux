@@ -1,19 +1,19 @@
 
 add a auto table of contents = "ctrl shift p" to add a command to vsc and search "create table of contents"
 
-# Table of contents
-- [Table of contents](#table-of-contents)
-  - [Rules for Cloud](#rules-for-cloud)
-  - [Azure VM labelled diagram](#azure-vm-labelled-diagram)
-  - [Create an Azure test VNet](#create-an-azure-test-vnet)
+
+- [Rules for Cloud](#rules-for-cloud)
+- [Azure VM labelled diagram](#azure-vm-labelled-diagram)
+- [Create an Azure test VNet](#create-an-azure-test-vnet)
 - [To delete a Azure VNet](#to-delete-a-azure-vnet)
-  - [Make our actual VNet](#make-our-actual-vnet)
-  - [Create a ssh key pair](#create-a-ssh-key-pair)
-  - [Considerations for creating a VM - Create a plan](#considerations-for-creating-a-vm---create-a-plan)
-  - [Creating a Virtual Machine](#creating-a-virtual-machine)
-  - [Stop a VM](#stop-a-vm)
-  - [Log into your VM (WITH NO PATH)](#log-into-your-vm-with-no-path)
-  - [With a path (will find the key from any folder in your home direc)](#with-a-path-will-find-the-key-from-any-folder-in-your-home-direc)
+- [Make our actual VNet](#make-our-actual-vnet)
+- [Create a ssh key pair](#create-a-ssh-key-pair)
+- [Considerations for creating a VM - Create a plan](#considerations-for-creating-a-vm---create-a-plan)
+- [Creating a Virtual Machine](#creating-a-virtual-machine)
+- [Stop a VM](#stop-a-vm)
+- [Log into your VM (WITH NO PATH)](#log-into-your-vm-with-no-path)
+- [With a path (will find the key from any folder in your home direc)](#with-a-path-will-find-the-key-from-any-folder-in-your-home-direc)
+
 
 
 ## Rules for Cloud
@@ -63,7 +63,7 @@ DO NOT EVER EXPOSE YOUR CREDENTIALS:
 
 
 
-# To delete a Azure VNet
+## To delete a Azure VNet
 1. search resource groups
 2. you can see everything in the resource group
 3. click into it and select the VNet you want to delete

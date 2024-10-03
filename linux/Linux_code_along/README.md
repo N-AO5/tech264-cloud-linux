@@ -1,12 +1,10 @@
 
-## Linux 
 
-- [Linux](#linux)
-  - [what is Linux](#what-is-linux)
-  - [Linux commands](#linux-commands)
-  - [Navigating files and folders](#navigating-files-and-folders)
-  - [Installing a package \[FIRST THING TO DO WHEN U OPEN YOUR VM\]](#installing-a-package-first-thing-to-do-when-u-open-your-vm)
-    - [Running multiple commands as the Super User](#running-multiple-commands-as-the-super-user)
+- [what is Linux](#what-is-linux)
+- [Linux commands](#linux-commands)
+- [Navigating files and folders](#navigating-files-and-folders)
+- [Installing a package \[FIRST THING TO DO WHEN U OPEN YOUR VM\]](#installing-a-package-first-thing-to-do-when-u-open-your-vm)
+- [Running multiple commands as the Super User](#running-multiple-commands-as-the-super-user)
 
 ### what is Linux
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -69,8 +67,9 @@ root in linux is the super user- all permissions
 - ``` sudo apt install *package*``` eg. tree package which does this: ![alt text](image-2.png)
 - ``` sudo apt upgrade -y```upgrade all the packages installed CAN BREAK OS (sys software may need/already running a specific version of a specific package)
 
-#### Running multiple commands as the Super User
+### Running multiple commands as the Super User
 - ``` cd /``` cd into the top of the direc tree, root direc [BE CAREFUL CAN BREAK]
 - there is a *root* folder for the SU
 - ``` sudo su``` log in as rootuser to access the *root* folder
 - *exit* to log out
+  
