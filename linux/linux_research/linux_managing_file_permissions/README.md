@@ -7,10 +7,11 @@ No, the owner has permission to change the permissions. They must explicitly cha
 The user entity is the owner. you can give permission to read, write and execute.
 
 ### If you give permissions to the Group entity, what does this mean?
+
 This is when you decide what the group that the owner belongs to can do. Like the owner it can be to read, write and execute.
 
 ### If you give permissions to the Other entity, what does this mean?
-Other refers to all other users that can access the system and also can be given permission to read, write or execute.
+Other refers to all other users that can access the system but aren't part of the group and also can be given permission to read, write or execute.
 
 ### You give the following permissions to a file: User permissions are read-only, Group permissions are read and write, Other permissions are read, write and execute. You are logged in as the user which is owner of the file. What permissions will you have on this file? Explain.
 You will have permission to read-only because you are the user which is the owner of the file

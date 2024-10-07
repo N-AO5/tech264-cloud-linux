@@ -21,6 +21,10 @@ Research:
 
 ``` chmod a+x testfile.txt```
 
+or
+
+``` chmod +x testfile.txt```
+
 #### Take write permissions away from Group
 ``` chmod g-w testfile.txt```
 

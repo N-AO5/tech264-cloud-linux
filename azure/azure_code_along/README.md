@@ -6,6 +6,7 @@ add a auto table of contents = "ctrl shift p" to add a command to vsc and search
 - [Azure VM labelled diagram](#azure-vm-labelled-diagram)
 - [Create an Azure test VNet](#create-an-azure-test-vnet)
 - [To delete a Azure VNet](#to-delete-a-azure-vnet)
+- [To delete a VM](#to-delete-a-vm)
 - [Make our actual VNet](#make-our-actual-vnet)
 - [Create a ssh key pair](#create-a-ssh-key-pair)
 - [Considerations for creating a VM - Create a plan](#considerations-for-creating-a-vm---create-a-plan)
@@ -69,6 +70,13 @@ DO NOT EVER EXPOSE YOUR CREDENTIALS:
 3. click into it and select the VNet you want to delete
 4. click the three dots to the right at the top and confirm delete, NOT delete resource group
 
+## To delete a VM
+   1. If you click onto ur VM and click delete, it will also delete the network interface card and the IP address
+   2. the better way, got to resource group on Azure
+   3. click the things you don't want to reuse
+   ![alt text](image.png)
+   -   you can reuse the public IP
+  4. Click delete, tick the box and confirm delete.
 
 ## Make our actual VNet 
 - a virtual machine is like a computer but in the cloud - we want to run linux from our local machines
@@ -145,11 +153,11 @@ The API  (ARM) running behind Azure (carries out of the services).
 6. availability zone (it will choose for you): ![alt text](image-10.png)
 7. security type - change to standard
 8. images (a snap shot of set of files from your hard drive, inc an os)
-    - choose ![alt text](image-11.png)
+    - choose ubuntu 22.02 
 9. Leave VM arch. as x64
 size as follows
-10. ![alt text](image-12.png)
-11. fill admin account section as follows:
+1.  ![alt text](image-12.png)
+2.  fill admin account section as follows:
     - use a ssh public key
     - change default username to adminuser
     - use existing key
@@ -160,14 +168,15 @@ size as follows
 13. next onto discs tab, choose standard ssd
 ![alt text](image-15.png)
 14. next onto networking
+
 15. select your VNet
 16. select your subnet (public)
 17. leave public IP and NIC unedited. The page should look as follows:
 ![alt text](image-16.png) 
-18. select "Delete public IP and NIC when VM is delete" 
-19. skip tabs until tags
-20. Set you owner kay with your name
-21. click create
+1.  select "Delete public IP and NIC when VM is delete" 
+2.  skip tabs until tags
+3.  Set you owner kay with your name
+4.  click create
 
 ## Stop a VM
 1. find and click on your VM

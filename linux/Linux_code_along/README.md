@@ -1,5 +1,7 @@
 
 
+- [What is Linux?](#what-is-linux)
+- [Linux Commands](#linux-commands)
 - [Navigating Files and Folders](#navigating-files-and-folders)
   - [Installing a package \[FIRST THING TO DO WHEN U OPEN YOUR VM\]](#installing-a-package-first-thing-to-do-when-u-open-your-vm)
   - [Running Multiple Commands as the Super User](#running-multiple-commands-as-the-super-user)
@@ -13,19 +15,26 @@
   - [System Processes](#system-processes)
     - [Running a Process](#running-a-process)
     - [Killing a Process](#killing-a-process)
+- [New VM to run the app](#new-vm-to-run-the-app)
+  - [Test your code before creating a script](#test-your-code-before-creating-a-script)
+  - [Install dependency (for our app)](#install-dependency-for-our-app)
+  - [move the scp (secure copy) to copy app folder into the home direc of the VM](#move-the-scp-secure-copy-to-copy-app-folder-into-the-home-direc-of-the-vm)
+  - [How to get the app running manually](#how-to-get-the-app-running-manually)
+- [Create another VM for app database](#create-another-vm-for-app-database)
+- [Now to connect](#now-to-connect)
 
-### what is Linux?
+## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
 - We're using linux for it flexibility, cheaper price, stable os, scales up very easily.
 - Often used for DevOps
 - ubuntu is just one distribution (like one flavour/version of linux)
 - BASH is a shell interprets the linux commands 
 - 
-### Linux Commands
+## Linux Commands
 - ```ls```lists the files and direc
 - ``` cd``` followed by the name of the direc to open a direc
 - ```ls -a``` lists hidden files too
-- ``` pwd ``` prints the presenr working direc
+- ``` pwd ``` prints the present working direc
 - ``` mkdir``` followed by the name you choose creates a direc, can make multiple if there is a space btwn each file name
   -  if you want a space in the file name, use quotes
 - ``` rmdir``` removes an empty direc
@@ -71,10 +80,10 @@
 
 ### Installing a package [FIRST THING TO DO WHEN U OPEN YOUR VM]
 root in linux is the super user- all permissions 
-```apt``` is a package manager
+```apt``` is a package manager or you can use ```apt-get```
 ```sudo``` is Super User DO
 
-- ```sudo apt update -y``` to update the package list from a source list, the ```-y``` means yes to any prompted questions
+- ```sudo apt(-get) update -y``` to update the package list from a source list, the ```-y``` means yes to any prompted questions
 - ``` sudo apt install *package*```
   -  eg. tree package (allows you to see files ina different way to ls) which does this: ![alt text](image-2.png)
 - ``` sudo apt upgrade -y```upgrade all the packages installed CAN BREAK OS (sys software may need/already running a specific version of a specific package)
@@ -119,11 +128,15 @@ root in linux is the super user- all permissions
 ## Environment Variables
 A value is stored in memory with a particular name so we can refer to it, it is available to any tool/command that wants to look up and get said values.
 
-They can be used to put credentials into memory- ONLY TEMPORARILY MUST BE DELETED AFTER.
+The purpose is to stored a value in the os so a particular tool, software or code that will need to refer to is at a later time.
+ -eg. how to connect to a database; an env ver store the connection string.
+- They can be used to put credentials into memory- ONLY TEMPORARILY MUST BE DELETED AFTER. so you don't hard code sensitive data into your project.
+  
 
 They can be set by your sys(windows/linux) but you can do it to
 
-This environment variable we are setting uo contains info about where to go to find a database
+This environment variable we are setting up contains info about where to go to find a database.
+
  - ```printenv``` prints out environment variables onto the screen
 - ```printenv *env variable name* ``` print out just one env variable, match the caplocks ![alt text](image-6.png)
   
@@ -187,3 +200,114 @@ TTY is the terminal session ID ```pts/0``` means first terminal logged in
   - but if you brute force kill, the process manager will start another process bc thats it's job
   - if you kill the parent process it can leave the child processes in memory running as a zombie process - probably still occupying the port
   - if you use level 15 (standard termination) on the parent process manager  it will GRACEFULLY kill the child processes and then the parent
+  
+
+## New VM to run the app
+- create VM to run thr app
+
+### Test your code before creating a script
+- do your sudo apt update and upgrade- do this to check that command wont ask for user input bc of a different image on a different VM
+- if it asks for user input "tab + enter"
+- to make sure upgrade doesn't ask for user input on a FRESH vm use ```sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y``` 
+- install nginx and add the DEBIAN to make sure it's not interactive (no user inputs)![alt text](image-18.png) 
+  ```sudo DEBIAN_FRONTEND=noninteractive apt-get install nginx -y```
+  
+### Install dependency (for our app)
+- curl to download content from the internet
+-  download script file to download node js with NO POP UPS (bc of the addition of the ```DEBIAN_FRONTEND=noninteractive```)
+````
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+````
+
+- ```node -v``` check if the node js is installed
+- now the commands have been tested, now put them into a script
+  - ``` nano prov-app.sh``` to make and ano into a script
+  - echo to tell us how far the script is going. 
+```
+#!/bin/bash
+ 
+echo update sources list...
+sudo apt-get update -y
+echo Done!
+ 
+echo upgrade any packages available...
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+echo Done!
+ 
+echo install nginx...
+sudo DEBIAN_FRONTEND=noninteractive apt-get install nginx -y
+echo Done!
+ 
+echo install nodejs v20...
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+echo Done!
+ 
+echo check nodejs version...
+node -v
+echo Done!
+```
+- change permissions to allow execution ```chmod +x prov-app.sh```
+- execute the script ```./prov-app.sh```
+  
+### move the scp (secure copy) to copy app folder into the home direc of the VM
+- unzip the file with the app data in it
+- copy the unzipped app code an place in a file "app" in your vm
+  - ```scp -i <path_to_private_key> <local_file_path> <username>@<remote_host>:<remote_directory_path>``` use the scp command to move the app code ![alt text](image-22.png)
+
+
+### How to get the app running manually
+- log back into your VM
+- cd into the file that contains the app code
+- cd into the app folder then ```npm install```
+- if there are warning- make sure they're not red, at least for testing
+- make sure there are 0 vulnerabilities
+- when installed now we run (this is just the front page)
+- ```node app.js``` to run the app
+  ![alt text](image-19.png)
+- when you go to a IP address is will default port 480
+- add access in NIC rules 
+  - go to your VM and go to network setting to change the inbound destination to port 3000
+  - the lower the priority number, the higher the priority
+   ![alt text](image-21.png)
+- add :*port number* to go to the required port number in the url ![alt text](image-20.png)
+- ctrl + z to stop the app running 
+
+## Create another VM for app database 
+- follow -the instructions on the Azure code along
+- do your update and upgrade commands (with the DEBIAN_FRONTEND=noninteractive for upgrade)
+- install gnupg to ensure future commands work ```sudo apt-get install gnupg curl```
+- install mongodb server 
+  
+```
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+   --dearmor
+   ```
+
+- install source file list - the sources of the packages needed to install mongodb 
+  ```
+  echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+  ```
+  - now update to make sure we have the updated version of these packages
+  - now download mongodb
+  
+```
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mongodb-org=7.0.6 mongodb-org-database=7.0.6 mongodb-org-server=7.0.6 mongodb-mongosh=2.1.5 mongodb-org-mongos=7.0.6 mongodb-org-tools=7.0.6
+```
+
+  - to run the mongodb ```sudo systemctl start mongod```
+  - currently not accepting any IPs so use ```sudo nano /etc/mongod.conf``` to open the config file for mongo and change the network bind IP to 0.0.0.0
+  restart it ```sudo systemctl restart mongod```
+- check if enabled? ```sudo systemctl is-enabled mongod```
+- enable it ```sudo systemctl enable mongod```
+
+## Now to connect 
+- open another gitbash window and login to the run app VM
+- cd into app folder
+- we need to create a pipe to allow the vm to run the db vm by making an env. ver.
+- ```DB_HOST=mongodb://10.0.3.4:27017/posts``` to export using the private IP as you're already "inside""
+- Check? ```printenv DB_HOST```
+- install ```npm install```
+- db should be seeded, if the ip/post page is empty use ```node seeds/seed.js``` then npm start 
