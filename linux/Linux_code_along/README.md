@@ -18,15 +18,24 @@
 - [New VM to run the app](#new-vm-to-run-the-app)
   - [Test your code before creating a script](#test-your-code-before-creating-a-script)
   - [Install dependency (for our app)](#install-dependency-for-our-app)
-  - [move the scp (secure copy) to copy app folder into the home direc of the VM](#move-the-scp-secure-copy-to-copy-app-folder-into-the-home-direc-of-the-vm)
+  - [move the scp (secure copy) to copy app folder into the home direc of the VM (app)](#move-the-scp-secure-copy-to-copy-app-folder-into-the-home-direc-of-the-vm-app)
+  - [move git/git clone to copy app folder into the home  direc of the VM (app)](#move-gitgit-clone-to-copy-app-folder-into-the-home--direc-of-the-vm-app)
   - [How to get the app running manually](#how-to-get-the-app-running-manually)
 - [Create another VM for app database](#create-another-vm-for-app-database)
-- [Now to connect](#now-to-connect)
+- [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
+  - [Run provisions and app in the background within a script](#run-provisions-and-app-in-the-background-within-a-script)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
 - We're using linux for it flexibility, cheaper price, stable os, scales up very easily.
-- Often used for DevOps
+  - Often used for DevOps
+  - open source - easy top customize and tailor (optimization)
+  - flexibility- can run on lots of different os
+  - integrate - offers powerful command line driven tools (terraform and ansible)
+  - very stable and secure - consistently works reliably 
+  - 
+
+
 - ubuntu is just one distribution (like one flavour/version of linux)
 - BASH is a shell interprets the linux commands 
 - 
@@ -203,7 +212,7 @@ TTY is the terminal session ID ```pts/0``` means first terminal logged in
   
 
 ## New VM to run the app
-- create VM to run thr app
+- create VM to run the app
 
 ### Test your code before creating a script
 - do your sudo apt update and upgrade- do this to check that command wont ask for user input bc of a different image on a different VM
@@ -251,10 +260,23 @@ echo Done!
 - change permissions to allow execution ```chmod +x prov-app.sh```
 - execute the script ```./prov-app.sh```
   
-### move the scp (secure copy) to copy app folder into the home direc of the VM
+
+### move the scp (secure copy) to copy app folder into the home direc of the VM (app)
 - unzip the file with the app data in it
 - copy the unzipped app code an place in a file "app" in your vm
   - ```scp -i <path_to_private_key> <local_file_path> <username>@<remote_host>:<remote_directory_path>``` use the scp command to move the app code ![alt text](image-22.png)
+
+### move git/git clone to copy app folder into the home  direc of the VM (app)
+- ssh into your app vm
+- use the command sudo apt to upgrade and then install git, if you don't already have it ```sudo apt-get update
+sudo apt-get install git```
+- cd into the repo you'd like to clone into
+- clone via https 
+``` git clone https://github.com/<username>/<repository_name>.git```
+
+```https://github.com/N-AO5/tech264-sparta-app.git```
+
+- ls to double check the clone is now on your VM
 
 
 ### How to get the app running manually
@@ -278,7 +300,7 @@ echo Done!
 - follow -the instructions on the Azure code along
 - do your update and upgrade commands (with the DEBIAN_FRONTEND=noninteractive for upgrade)
 - install gnupg to ensure future commands work ```sudo apt-get install gnupg curl```
-- install mongodb server 
+- install mongodb server (the version that is compatible with the app)
   
 ```
 curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
@@ -298,12 +320,13 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 ```
 
   - to run the mongodb ```sudo systemctl start mongod```
-  - currently not accepting any IPs so use ```sudo nano /etc/mongod.conf``` to open the config file for mongo and change the network bind IP to 0.0.0.0
-  restart it ```sudo systemctl restart mongod```
+  - currently not accepting any IPs other than a connection from the local machine (only this vm- Local IP 127.0.0.1) so use ```sudo nano /etc/mongod.conf``` to open the config file for mongo and change the network **Bind IP** to 0.0.0.0 - this will allow traffic/connections from any ID addresses to access the database
+- restart the mongo db ```sudo systemctl restart mongod```
 - check if enabled? ```sudo systemctl is-enabled mongod```
 - enable it ```sudo systemctl enable mongod```
 
-## Now to connect 
+(use a command scd to change the bind ip when automation in the script)
+## Now to connect app VM to db VM
 - open another gitbash window and login to the run app VM
 - cd into app folder
 - we need to create a pipe to allow the vm to run the db vm by making an env. ver.
@@ -311,3 +334,66 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 - Check? ```printenv DB_HOST```
 - install ```npm install```
 - db should be seeded, if the ip/post page is empty use ```node seeds/seed.js``` then npm start 
+
+### Run provisions and app in the background within a script
+
+use the & in your script 
+write app script
+delete old vm and create new vm and test the script 
+
+```
+#!/bin/bash
+
+GITHUB_REPO="https://github.com/N-AO5/tech264-sparta-app.git"  
+APP_FOLDER="tech264-sparta-app"
+
+echo update sources list...
+sudo apt update -y
+echo Done.
+
+echo upgrade any upgradable packages available...
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+echo Done.
+
+echo install nginx...
+sudo DEBIAN_FRONTEND=noninteractive apt-get install nginx -y
+echo Done.
+
+echo install nodejs v20...
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
+echo Done!
+
+echo check nodejs version...
+node -v
+echo Done!
+
+echo Cloning GitHub repository...
+git clone $GITHUB_REPO
+echo Done!
+
+echo cd into the app file
+cd tech264-sparta-app/app
+echo now into the app file
+
+echo npm install
+npm install
+echo npm install done
+
+echo run the app in the background
+node app.js & 
+echo all done!
+````
+
+- change permissions to allow execution ```chmod +x prov-app.sh```
+- execute the script ```./prov-app.sh```
+
+- to test 
+  - create new VM
+  - ssh in
+  - ``` nano prov-app.sh``` to create your script
+  - copy script into shell file
+  - change permissions to give permission ```chmod +x prov-app.sh```
+  - execute ```./prov-app.sh```
+  - change NSG rules to allow to port 3000
+  - check at *IP address*:3000
