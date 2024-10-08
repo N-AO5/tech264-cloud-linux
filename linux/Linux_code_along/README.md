@@ -23,7 +23,11 @@
   - [How to get the app running manually](#how-to-get-the-app-running-manually)
 - [Create another VM for app database](#create-another-vm-for-app-database)
 - [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
-  - [Run provisions and app in the background within a script](#run-provisions-and-app-in-the-background-within-a-script)
+- [TASK: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
+- [TASK: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
+    - [port 3000 is in use, kill the old process](#port-3000-is-in-use-kill-the-old-process)
+    - [sparta runs in the back ground- use a process manager pm2 to stop the process rather than killing it](#sparta-runs-in-the-back-ground--use-a-process-manager-pm2-to-stop-the-process-rather-than-killing-it)
+    - [get the reverse proxy working - would be in app script (after the install nginx file)](#get-the-reverse-proxy-working---would-be-in-app-script-after-the-install-nginx-file)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -326,6 +330,7 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 - enable it ```sudo systemctl enable mongod```
 
 (use a command scd to change the bind ip when automation in the script)
+
 ## Now to connect app VM to db VM
 - open another gitbash window and login to the run app VM
 - cd into app folder
@@ -335,17 +340,15 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 - install ```npm install```
 - db should be seeded, if the ip/post page is empty use ```node seeds/seed.js``` then npm start 
 
-### Run provisions and app in the background within a script
+## TASK: Stage 1, Create a provisions script to run app in the background
 
 use the & in your script 
 write app script
 delete old vm and create new vm and test the script 
+create the provisions script - ```nano prov-app.s```
 
 ```
 #!/bin/bash
-
-GITHUB_REPO="https://github.com/N-AO5/tech264-sparta-app.git"  
-APP_FOLDER="tech264-sparta-app"
 
 echo update sources list...
 sudo apt update -y
@@ -369,7 +372,7 @@ node -v
 echo Done!
 
 echo Cloning GitHub repository...
-git clone $GITHUB_REPO
+git clone https://github.com/N-AO5/tech264-sparta-app.git 
 echo Done!
 
 echo cd into the app file
@@ -384,10 +387,15 @@ echo run the app in the background
 node app.js & 
 echo all done!
 ````
-
+REMEMBER!
 - change permissions to allow execution ```chmod +x prov-app.sh```
 - execute the script ```./prov-app.sh```
 
+ALSO!
+- when you used a git clone, it names the cloned repo the same name as on github- to change the local repo name add the new name after the url 
+ALSO!
+- you can use npm start or node app.js (for our purposes)
+  
 - to test 
   - create new VM
   - ssh in
@@ -397,3 +405,127 @@ echo all done!
   - execute ```./prov-app.sh```
   - change NSG rules to allow to port 3000
   - check at *IP address*:3000
+
+## TASK: stage 2, Create a provisions script for mongo DB 
+
+- create the provisions script ```nano prov-db.sh```
+
+```
+#!/bin/bash
+ 
+# Update the system package list
+echo Updating package list...
+sudo apt-get update -y
+echo Done!
+ 
+# Upgrade all installed packages to their latest versions
+echo Upgrading installed packages...
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+echo Done!
+ 
+echo Installing gnupg and curl...
+sudo apt-get install gnupg curl -y
+echo Done!
+ 
+# Download and add MongoDB GPG key for package verification
+echo Adding MongoDB GPG key...
+sudo rm -f /usr/share/keyrings/mongodb-server-7.0.gpg # Remove key if one exists
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg --yes -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
+echo Done!
+ 
+# Add MongoDB repository to the sources list
+echo Adding MongoDB repository to sources list...
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+echo Done!
+ 
+# Update package list again to include the newly added MongoDB repository
+echo Updating package list with MongoDB repository...
+sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+echo Done!
+ 
+# Install MongoDB version 7.0.6 and specific associated packages non-interactively
+echo Installing MongoDB and related packages...
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    mongodb-org=7.0.6 \
+    mongodb-org-database=7.0.6 \
+    mongodb-org-server=7.0.6 \
+    mongodb-org-shell=7.0.6 \
+    mongodb-org-mongos=7.0.6
+echo Done!
+ 
+# Start MongoDB service immediately
+echo Starting MongoDB service...
+sudo systemctl start mongod
+echo Done!
+ 
+# Enable MongoDB service to start on boot
+echo Enabling MongoDB service to start on boot...
+sudo systemctl enable mongod
+echo Done!
+ 
+# Modify MongoDB configuration to allow remote connections
+echo Configuring MongoDB to allow remote connections...
+sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
+echo Done!
+ 
+# Restart MongoDB service to apply configurations
+echo Restarting MongoDB service...
+sudo systemctl start mongod
+echo Done!
+
+````
+- change permissions to allow you to execute ```chmod +x prov-db.sh```
+- run script ```./prov-db.sh```
+
+
+line 26 eof while looking for macthing "
+ling 65 systax error
+
+
+
+
+
+
+
+
+
+
+
+#### port 3000 is in use, kill the old process
+
+#### sparta runs in the back ground- use a process manager pm2 to stop the process rather than killing it
+
+#### get the reverse proxy working - would be in app script (after the install nginx file)
+
+- to get to our app you have to add the port number for the app
+- to fix this - we need something to redirect traffic to port 3000 when we go to the public IP
+
+![alt text](image-23.png)
+
+- ```sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup``` to copy and therefore back up the nginx config file
+-```/etc/nginx/sites-available``` into the nginx file 
+
+- ```sudo nano proxy.conf``` create another default file and add
+```
+  server {
+    listen 80;
+    server_name your_domain_or_ip;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+- ```sudo ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/``` links the file we made to the enabled sites in teh etc file- therefore enabling nginx
+
+- ```sudo systemctl restart nginx```
+
+
+
+
+
+
