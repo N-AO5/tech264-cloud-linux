@@ -59,3 +59,8 @@ echo Done!
 echo Restarting MongoDB service...
 sudo systemctl start mongod
 echo Done!
+
+# To test 
+# sudo systemctl status mongod - should be active (running), be patient, it takes a while to start
+# cat /etc/mongod.conf | grep bindIp - should show bindIp:0.0.0.0
+# sudo systemctl is-enabled mongod - should say enabled

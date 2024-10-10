@@ -35,6 +35,9 @@
     - [How to used pm2](#how-to-used-pm2)
 - [Task: Automate configuration of nginx reverse proxy](#task-automate-configuration-of-nginx-reverse-proxy)
 - [Task: User data](#task-user-data)
+- [Levels of automation- Deploying out app on the cloud](#levels-of-automation--deploying-out-app-on-the-cloud)
+  - [Create an new VM using Ramon's image](#create-an-new-vm-using-ramons-image)
+  - [Create an image for our virtual machines](#create-an-image-for-our-virtual-machines)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -478,10 +481,13 @@ location / {
 A production process manager that allows you to run your apps in the background, keep them alive (restart automatically if they crash), monitor performance, and handle logs.
 
 #### How to used pm2
+using ```&``` to run in background isn't good bc you'll have to find and kill the process to allow it to run again.
+
 1. ``` sudo npm install -g pm2 ```install PM2 in your script after you've updated, upgraded, installed mongo and installed node js
 2. instead of ```npm start &``` or ```node app.js &``` put ```pm2 start npm app.js``` at the end of your script.
 3. you can use the command ```pm2 stop npm``` If you have multiple processes managed by PM2 that were started with the npm -- start, you can stop them all using this command. This effectively halts the application, but does not remove it from PM2's process list
 4.  and ```pm2 restart npm``` to This command restarts the running process associated with the npm command. PM2 will first stop the current instance and then start it again, ensuring any updates or changes are applied
+5.  use ```pm2 stop all``` to stop all previous process so the script is usable multiple times
 
 
 Work out ways to both run, stop and re-start the app in the background (besides using the "&" at the end of the command):
@@ -493,9 +499,16 @@ Document the methods you got working
 Check the app is working in your browser at the IP address of the VM with :3000 appended to the end (or without port 3000 in the URL if your reverse proxy is running).
 
 ## Task: Automate configuration of nginx reverse proxy
+the -i means replace 
 
 use the sed command to replace the Bind IP 
 ```sed -i '0,/location \/ {/s//location \/ {\n        proxy_pass http:\/\/localhost:3000;/' /etc/nginx/sites-available/default```
+
+```
+sudo sed -i 's|try_files $uri $uri/ =404;|proxy_pass http://localhost:3000;|' /etc/nginx/sites-available/default
+```
+
+you can test using ```sudo nginx -t```
 
 ## Task: User data
 - tick the box in tab before "tags" when creating a VM - only HTTP
@@ -506,3 +519,42 @@ use the sed command to replace the Bind IP
   - runs from the root folder (the very top of the direct) 
   - remember to adjust your git clone- the cloned repo will be in the root folder (no need for a file path, just cd into sparta folder) 
   - ```sudo cat /var/log/cloud-init-output.log``` to see inside the log file that contains your user data script when in your vm
+  - to restart the app after youve logged out and logged back in ```pm2 start app.js```
+- When you start you new vm you should see:
+  1. Error in the first 6 seconds
+  2. nginx home page
+  3. 502 error: bad gateway - while the app begins to run
+  4. app displays
+
+
+
+## Levels of automation- Deploying out app on the cloud
+
+level 1. manually test the commands - ssh in
+level 2. run a bash script with the commands - ssh 
+level 3, input script into user data - no need to ssh in
+level 4: use an image + some user data (prov-app-starting-code.sh) to make things run faster
+  - (makes app come up faster when you run your vm)
+  - an image is a stored screenshot (os, files, folders) of your entire machine on the disc
+  - can be used to start new vm with the same set of files
+  - remember you still need to run the app to get it started (the extra lil user data)
+
+### Create an new VM using Ramon's image
+- create both app vm and db vm
+- use bash scripts and input into user data
+- ensure in the app vm script has the correct private ip (of the db vm) for db_host env. var.
+- test both vms (see scripts)
+- ensure the app page shows up on url
+  
+### Create an image for our virtual machines
+1. go to resource for your vm
+2. capture -> image
+3. select these:
+  ![alt text](image-24.png)
+4. rename to a suitable name 
+  ![alt text](image-25.png)
+5. run this command when you ssh into your vm
+  ![alt text](image-26.png)
+  ![alt text](image-27.png)
+  ```sudo waagent -deprovision+user```
+6. then you can click create
