@@ -10,6 +10,8 @@
     - [Set a Variable (for a script)](#set-a-variable-for-a-script)
     - [Set an Environment Variable](#set-an-environment-variable)
     - [Set a Persistent Variable](#set-a-persistent-variable)
+      - [Option 1](#option-1)
+      - [Option 2- avoid having to ssh in and out to reload the .bashrc file](#option-2--avoid-having-to-ssh-in-and-out-to-reload-the-bashrc-file)
 - [Managing Processes](#managing-processes)
   - [User Processes](#user-processes)
   - [System Processes](#system-processes)
@@ -25,9 +27,14 @@
 - [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
 - [TASK: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
 - [TASK: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
-    - [port 3000 is in use, kill the old process](#port-3000-is-in-use-kill-the-old-process)
-    - [sparta runs in the back ground- use a process manager pm2 to stop the process rather than killing it](#sparta-runs-in-the-back-ground--use-a-process-manager-pm2-to-stop-the-process-rather-than-killing-it)
-    - [get the reverse proxy working - would be in app script (after the install nginx file)](#get-the-reverse-proxy-working---would-be-in-app-script-after-the-install-nginx-file)
+- [Task:How many services can use a port](#taskhow-many-services-can-use-a-port)
+- [Task: Reverse proxy - would be in app script (after the install nginx file)](#task-reverse-proxy---would-be-in-app-script-after-the-install-nginx-file)
+- [VM SECURITY](#vm-security)
+- [Task: Run Sparta app in the background - using pm2](#task-run-sparta-app-in-the-background---using-pm2)
+    - [What is pm2](#what-is-pm2)
+    - [How to used pm2](#how-to-used-pm2)
+- [Task: Automate configuration of nginx reverse proxy](#task-automate-configuration-of-nginx-reverse-proxy)
+- [Task: User data](#task-user-data)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -161,6 +168,8 @@ This environment variable we are setting up contains info about where to go to f
 - ```export *set the name and value*``` set like with a normal variable ![alt text](image-9.png)
   
 #### Set a Persistent Variable
+
+##### Option 1
 - To allow a env var to stay when you log out and log in - persistence
   - set env var in the ```.bashrc``` file in your home direc. that loads up every time you log in
   - so it will be set that the variable will still exist if you log in as that user
@@ -171,6 +180,11 @@ This environment variable we are setting up contains info about where to go to f
   - ```>``` will replace EVERYTHING in the .bashrc file 
   - ```>>``` will APPEND the output to the bottom of the ```.bashrc``` file 
 - eg. ![alt text](image-12.png)
+
+##### Option 2- avoid having to ssh in and out to reload the .bashrc file
+- ```source.bashrc``` to assign the env. var. and reload the config and therefore reload the export command
+
+
 
 ## Managing Processes
 A process is a program that been loaded into memory (RAM) (not doing much)
@@ -345,48 +359,11 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 use the & in your script 
 write app script
 delete old vm and create new vm and test the script 
-create the provisions script - ```nano prov-app.s```
+create the provisions script - ```nano prov-app.sh```
 
-```
-#!/bin/bash
+[prov-app.sh](prov-app.sh)
 
-echo update sources list...
-sudo apt update -y
-echo Done.
 
-echo upgrade any upgradable packages available...
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-echo Done.
-
-echo install nginx...
-sudo DEBIAN_FRONTEND=noninteractive apt-get install nginx -y
-echo Done.
-
-echo install nodejs v20...
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - &&\
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nodejs
-echo Done!
-
-echo check nodejs version...
-node -v
-echo Done!
-
-echo Cloning GitHub repository...
-git clone https://github.com/N-AO5/tech264-sparta-app.git 
-echo Done!
-
-echo cd into the app file
-cd tech264-sparta-app/app
-echo now into the app file
-
-echo npm install
-npm install
-echo npm install done
-
-echo run the app in the background
-node app.js & 
-echo all done!
-````
 REMEMBER!
 - change permissions to allow execution ```chmod +x prov-app.sh```
 - execute the script ```./prov-app.sh```
@@ -410,92 +387,36 @@ ALSO!
 
 - create the provisions script ```nano prov-db.sh```
 
-```
-#!/bin/bash
- 
-# Update the system package list
-echo Updating package list...
-sudo apt-get update -y
-echo Done!
- 
-# Upgrade all installed packages to their latest versions
-echo Upgrading installed packages...
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-echo Done!
- 
-echo Installing gnupg and curl...
-sudo apt-get install gnupg curl -y
-echo Done!
- 
-# Download and add MongoDB GPG key for package verification
-echo Adding MongoDB GPG key...
-sudo rm -f /usr/share/keyrings/mongodb-server-7.0.gpg # Remove key if one exists
-curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg --yes -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor
-echo Done!
- 
-# Add MongoDB repository to the sources list
-echo Adding MongoDB repository to sources list...
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-echo Done!
- 
-# Update package list again to include the newly added MongoDB repository
-echo Updating package list with MongoDB repository...
-sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
-echo Done!
- 
-# Install MongoDB version 7.0.6 and specific associated packages non-interactively
-echo Installing MongoDB and related packages...
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    mongodb-org=7.0.6 \
-    mongodb-org-database=7.0.6 \
-    mongodb-org-server=7.0.6 \
-    mongodb-org-shell=7.0.6 \
-    mongodb-org-mongos=7.0.6
-echo Done!
- 
-# Start MongoDB service immediately
-echo Starting MongoDB service...
-sudo systemctl start mongod
-echo Done!
- 
-# Enable MongoDB service to start on boot
-echo Enabling MongoDB service to start on boot...
-sudo systemctl enable mongod
-echo Done!
- 
-# Modify MongoDB configuration to allow remote connections
-echo Configuring MongoDB to allow remote connections...
-sudo sed -i 's/127.0.0.1/0.0.0.0/g' /etc/mongod.conf
-echo Done!
- 
-# Restart MongoDB service to apply configurations
-echo Restarting MongoDB service...
-sudo systemctl start mongod
-echo Done!
+ [prov-db.sh script](prov-db.sh)
 
-````
 - change permissions to allow you to execute ```chmod +x prov-db.sh```
 - run script ```./prov-db.sh```
 
+to connect the DB and app, add to the beginning of app script 
 
-line 26 eof while looking for macthing "
-ling 65 systax error
+```
+MONGODB__HOST="mongodb://10.0.3.4:27017"
+ 
+echo "Connect via our VMs via IP."
+export DB_HOST=$MONGODB__HOST
+echo "Connection complete."
+echo "Set env variable"
+printenv DB_HOST
+echo "env variable set."
+```
+
+## Task:How many services can use a port
+
+Port 3000 is in use, kill the old process
 
 
 
 
 
 
+sparta runs in the back ground- use a process manager pm2 to stop the process rather than killing it
 
-
-
-
-
-#### port 3000 is in use, kill the old process
-
-#### sparta runs in the back ground- use a process manager pm2 to stop the process rather than killing it
-
-#### get the reverse proxy working - would be in app script (after the install nginx file)
+## Task: Reverse proxy - would be in app script (after the install nginx file)
 
 - to get to our app you have to add the port number for the app
 - to fix this - we need something to redirect traffic to port 3000 when we go to the public IP
@@ -506,26 +427,82 @@ ling 65 systax error
 -```/etc/nginx/sites-available``` into the nginx file 
 
 - ```sudo nano proxy.conf``` create another default file and add
+
 ```
   server {
     listen 80;
-    server_name your_domain_or_ip;
+    server_name *your ip*;
 
     location / {
         proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        
     }
 }
 ```
-- ```sudo ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/``` links the file we made to the enabled sites in teh etc file- therefore enabling nginx
+OR 
+modify 
+```
+location / {
+       try_files $url $url/ =404;
+}
+```
+and replace with
+```
+location / {
+        proxy_pass http://localhost:3000;
+}
+
+```
+
+- ``` sudo nginx -t``` to see if theres an error in the syntax of the file
+
+- ```sudo ln -s /etc/nginx/sites-available/proxy.conf /etc/nginx/sites-enabled/``` links the file we made to the enabled sites in the etc file- therefore enabling nginx
 
 - ```sudo systemctl restart nginx```
 
 
 
+## VM SECURITY
+  nsg 
+- Go to network settings on app vm
+- go to inbound security rules
+- on allows private key that user has, BUT an IP can try to ssh into out machine
+- click rule and change source to *my IP address*
+- now only me and my IP address can try to ssh in- therefore better security
+  -but our public IP changes every time the router is restarted so you'll have to save my IP again
+- if this is a production server and you don't want ANYONE to ssh in- remove the rule or change action to deny
+
+## Task: Run Sparta app in the background - using pm2
+
+#### What is pm2
+A production process manager that allows you to run your apps in the background, keep them alive (restart automatically if they crash), monitor performance, and handle logs.
+
+#### How to used pm2
+1. ``` sudo npm install -g pm2 ```install PM2 in your script after you've updated, upgraded, installed mongo and installed node js
+2. instead of ```npm start &``` or ```node app.js &``` put ```pm2 start npm app.js``` at the end of your script.
+3. you can use the command ```pm2 stop npm``` If you have multiple processes managed by PM2 that were started with the npm -- start, you can stop them all using this command. This effectively halts the application, but does not remove it from PM2's process list
+4.  and ```pm2 restart npm``` to This command restarts the running process associated with the npm command. PM2 will first stop the current instance and then start it again, ensuring any updates or changes are applied
 
 
+Work out ways to both run, stop and re-start the app in the background (besides using the "&" at the end of the command):
 
+One way should use pm2
+If time: One other way (can you find another package manager do it like pm2?)
+You should have already used "&" at the end the command to run the app in the background - document the issue with using this method when it comes to stopping/re-starting the app
+Document the methods you got working
+Check the app is working in your browser at the IP address of the VM with :3000 appended to the end (or without port 3000 in the URL if your reverse proxy is running).
+
+## Task: Automate configuration of nginx reverse proxy
+
+use the sed command to replace the Bind IP 
+```sed -i '0,/location \/ {/s//location \/ {\n        proxy_pass http:\/\/localhost:3000;/' /etc/nginx/sites-available/default```
+
+## Task: User data
+- tick the box in tab before "tags" when creating a VM - only HTTP
+- Used to achieve next level automation
+- anything pasted (app script) into the user data box will run- 
+- ONLY runs ONCE as ROOT USER when the vm is created- to tun the app again just use the last few commands to run the app again
+  - doesn't start in home directory
+  - runs from the root folder (the very top of the direct) 
+  - remember to adjust your git clone- the cloned repo will be in the root folder (no need for a file path, just cd into sparta folder) 
+  - ```sudo cat /var/log/cloud-init-output.log``` to see inside the log file that contains your user data script when in your vm

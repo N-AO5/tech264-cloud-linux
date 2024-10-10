@@ -30,6 +30,8 @@ gitflow workflow (common, there are multiple types of git work flows):
 
 ```git reset --mixed HARD~1```  mixed reset - remove the commit but remove the changes from the staging area
 
+```git restore``` removes changes from staging and remove changes from the working directory
+
 feedback:
 - would be better if there was a situation/problem to explain clearer - use a context
 - how to i fix this? STAR approach
