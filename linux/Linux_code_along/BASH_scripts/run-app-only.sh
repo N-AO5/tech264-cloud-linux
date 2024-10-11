@@ -1,6 +1,5 @@
 #!/bin/bash
  
-GITHUB_REPO="https://github.com/N-AO5/tech264-sparta-app"
  
 MONGODB_HOST="mongodb://10.0.3.5:27017/posts"
  

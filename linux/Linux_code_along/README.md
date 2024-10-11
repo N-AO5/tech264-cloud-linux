@@ -38,6 +38,14 @@
 - [Levels of automation- Deploying out app on the cloud](#levels-of-automation--deploying-out-app-on-the-cloud)
   - [Create an new VM using Ramon's image](#create-an-new-vm-using-ramons-image)
   - [Create an image for our virtual machines](#create-an-image-for-our-virtual-machines)
+- [Monitoring and Alert management](#monitoring-and-alert-management)
+    - [How can you increase the management of a vm crash](#how-can-you-increase-the-management-of-a-vm-crash)
+    - [Types of scaling](#types-of-scaling)
+- [Test Monitoring](#test-monitoring)
+    - [Create a dashboard](#create-a-dashboard)
+    - [Now for some load testing](#now-for-some-load-testing)
+- [Azure VM Scale Set (aka Auto scaling on AWS)](#azure-vm-scale-set-aka-auto-scaling-on-aws)
+    - [AZ VM scale set architecture](#az-vm-scale-set-architecture)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -499,6 +507,9 @@ Document the methods you got working
 Check the app is working in your browser at the IP address of the VM with :3000 appended to the end (or without port 3000 in the URL if your reverse proxy is running).
 
 ## Task: Automate configuration of nginx reverse proxy
+This allows us to use the public IP without specifying which port the app is running, this is done by ngninx by changing the bind IP to 0.0.0.0.
+
+
 the -i means replace 
 
 use the sed command to replace the Bind IP 
@@ -556,10 +567,148 @@ level 4: use an image + some user data (prov-app-starting-code.sh) to make thing
 2. capture -> image
 3. select these:
   ![alt text](image-24.png)
+  if you tick that box then the vm delete after you create the image - your vm will be unusable post image creation
 4. rename to a suitable name 
   ![alt text](image-25.png)
 5. run this command when you ssh into your vm
   ![alt text](image-26.png)
   ![alt text](image-27.png)
   ```sudo waagent -deprovision+user```
+  it allows you to delete all the user data ready to be image 
 6. then you can click create
+
+## Monitoring and Alert management  
+#### How can you increase the management of a vm crash
+![alt text](<images/alert mangement image.png>)
+
+#### Types of scaling
+![alt text](<images/types of scaling.png>)
+
+## Test Monitoring
+we create an app vm using the images previously created
+
+#### Create a dashboard
+(to turn on the app again after you must manually ssh in and start it)
+1. go to monitoring tab
+   - cpu average
+   - disk bytes
+   - can see more metrics if you click link at the bottom
+2. click the pin on the CPU average 
+3. make a new, shared dashboard and fill in
+![alt text](image.png)
+4. add network total and disk operations metrics onto the dashboard 
+5. search dashboards at the top 
+6. click your dashboard
+7. can rearrange dashboards
+   1. click edit (lil pencil)
+   2. rearrange by dragging and dropping
+   3. remember to save
+8. to see the last 30 mins for example
+   1. click the metric you want change the time frame for 
+   2. ![alt text](image.png)
+
+#### Now for some load testing
+To find out what an appropriate threshold is required for an alarm system
+
+1. ssh into your machine, run the app and get your dashboard open where you can view
+  - ```cd /``` to cd into the root repo
+  - cd into your repo, app and use ```sudo pm2 start app.js```
+  - you can also just use ```sudo pm2 start /repo/app/app.js``` from your home repo
+2. check that the app is working if you check you public IP address 
+3. use a tool to increase the CPU (central processing unit)- 
+   1. it is a very small app with simple code and therefore doesn't need much cpu
+   2. the tool throws lots of requests to the app- juts for testing
+4. install apache ```sudo apt-get install apache2-utils -y```
+5. ``` ab -n 1000 -c 100 http://20.162.241.78/``` command sends 1000 req. in blocks of 100, and add your IP where it says http 
+6. spike from the first 1000 req.
+![alt text](<1000 reg. spike.png>)
+1. tells you on your github details about how long each request takes 
+2. next inc. values ```ab -n 10000 -c 200 http://20.162.241.78/``` 10 thousand req. in blocks of 200.
+3. it processes much slower then times out
+4.  ![alt text](<req. times out.png>)
+
+## Azure VM Scale Set (aka Auto scaling on AWS)
+
+#### AZ VM scale set architecture  
+![alt text](<az scale set arc..png>)
+
+The aim of this scale set to achieve high availability (multiple zones and multiple vms) and high 
+scalability (multiple vms). 
+
+1. search vm scale set
+2. create
+3. fill in like so:
+   ![alt text](<scale set 1.png>)
+1. select autoscaling
+2. adjust scaling config ![alt text](<scale set 2.png>)
+3. add your image (you made)
+4. fill rest as usual
+5. do disc - standard ssd
+6. do networking 
+   1.  choose your subnet and edit the network interface
+   2.  inbound ports ssh and http as well as public subnet (creating the apps scale set)
+   3.  disable public ip cos each vm does NOT need a public IP address
+   4.  select/create a load balancer
+       1.  tick az load balancer
+       2.  name using standard name convention
+       3.  keep it public
+       4.  can change backend port (load balancer rule) to the port we used ie 3000 (if we didn't have the nginx config.)
+       5.  inbound NAT rile- theres an increment of 1 in the inbound port per vm to ssh into the vm (port number re. to know which port your vm is in)
+       6.  create
+7. go to health
+8. enable app health monitoring
+9. enable auto repairs - replace and wait 10 mins before going in to repair
+![alt text](<scale set 3.png>)
+10. in the advanced tab,tick user data and add your RUN APP ONLY script
+[run-app-only](run-app-only.sh)
+1.  tag yourself
+2.  create
+3.  re restarting - start and then click reimage to userdata to restart again- copying the image over again
+4.  can upgrade image to all vms
+5.  check instances to see your vms and their health
+6.  to test - use load balancers ip address to view app 
+7.  to ssh in =to one of your vms
+    1.  go to instances 
+    2.  go to connect -> via ssh
+    3.  put in key 
+    4.  change to the public ip address of the load balance and add the inbound port (-p 50000)
+     ```ssh -i tech264-anjy-az-key -p 50000 adminuser@85.210.201.160```
+ 8.  To delete, select:
+     1.  vm scale set
+     2.  public ip 
+     3.  load balancers
+     4.  NSG for all the NIC
+
+Document:
+
+- what is a load balancer and why it is needed
+how to manage instances
+
+A load balancer is a service that distributes incoming network traffic across multiple instances to ensure that no single server is overwhelmed. It distributes the load evenly, improving the performance, availability, and reliability of applications.
+
+- steps on how to create an unhealthy instance (for testing) and why it is marked as healthy/unhealthy
+  1. go to scale set
+  2. search operating system 
+  3. modify user data to remove the npm start
+  4. delete one of your instances
+  5. the next one the load balancer creates will be unhealthy
+  6. it is marked as unhealthy because in the user data that runs initial script doesn't have a command to run the app
+
+- steps on how to SSH into an instance
+  
+ 1.  go to instances 
+ 2.  go to connect -> via ssh
+ 3.  put in key 
+ 4.  change to the public ip address of the load balance and add the inbound port (-p 50000)
+ ```ssh -i tech264-anjy-az-key -p 50000 adminuser@85.210.201.160```
+
+- steps on how to delete a VM Scale Set and all it's connecting parts
+  
+To delete, select:
+     1.  vm scale set
+     2.  public ip 
+     3.  load balancers
+     4.  NSG for all the NIC
+
+
+
