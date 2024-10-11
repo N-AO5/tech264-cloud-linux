@@ -519,7 +519,7 @@ you can test using ```sudo nginx -t```
   - runs from the root folder (the very top of the direct) 
   - remember to adjust your git clone- the cloned repo will be in the root folder (no need for a file path, just cd into sparta folder) 
   - ```sudo cat /var/log/cloud-init-output.log``` to see inside the log file that contains your user data script when in your vm
-  - to restart the app after youve logged out and logged back in ```pm2 start app.js```
+  - to restart the app after you've logged out and logged back in ```pm2 start app.js```
 - When you start you new vm you should see:
   1. Error in the first 6 seconds
   2. nginx home page
@@ -531,13 +531,18 @@ you can test using ```sudo nginx -t```
 ## Levels of automation- Deploying out app on the cloud
 
 level 1. manually test the commands - ssh in
+
 level 2. run a bash script with the commands - ssh 
+
 level 3, input script into user data - no need to ssh in
+
 level 4: use an image + some user data (prov-app-starting-code.sh) to make things run faster
   - (makes app come up faster when you run your vm)
   - an image is a stored screenshot (os, files, folders) of your entire machine on the disc
   - can be used to start new vm with the same set of files
   - remember you still need to run the app to get it started (the extra lil user data)
+
+![alt text](image-28.png)
 
 ### Create an new VM using Ramon's image
 - create both app vm and db vm
