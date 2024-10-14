@@ -25,11 +25,11 @@
   - [How to get the app running manually](#how-to-get-the-app-running-manually)
 - [Create another VM for app database](#create-another-vm-for-app-database)
 - [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
-- [TASK: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
-- [TASK: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
+- [Task: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
+- [Task: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
 - [Task:How many services can use a port](#taskhow-many-services-can-use-a-port)
 - [Task: Reverse proxy - would be in app script (after the install nginx file)](#task-reverse-proxy---would-be-in-app-script-after-the-install-nginx-file)
-- [VM SECURITY](#vm-security)
+- [VM security](#vm-security)
 - [Task: Run Sparta app in the background - using pm2](#task-run-sparta-app-in-the-background---using-pm2)
     - [What is pm2](#what-is-pm2)
     - [How to used pm2](#how-to-used-pm2)
@@ -48,11 +48,17 @@
     - [AZ VM scale set architecture](#az-vm-scale-set-architecture)
     - [How to make a scale set](#how-to-make-a-scale-set)
     - [Documentation about load balancers](#documentation-about-load-balancers)
-- [TASK: Azure Monitoring \& Alert Management](#task-azure-monitoring--alert-management)
-      - [What is worst to best in terms of monitoring and responding to load/traffic.](#what-is-worst-to-best-in-terms-of-monitoring-and-responding-to-loadtraffic)
-      - [How you setup a dashboard](#how-you-setup-a-dashboard)
-      - [How a combination of load testing and the dashboard helped us](#how-a-combination-of-load-testing-and-the-dashboard-helped-us)
+- [Task: Azure Monitoring \& Alert Management](#task-azure-monitoring--alert-management)
+    - [What is worst to best in terms of monitoring and responding to load/traffic.](#what-is-worst-to-best-in-terms-of-monitoring-and-responding-to-loadtraffic)
+    - [How you setup a dashboard](#how-you-setup-a-dashboard)
+    - [How a combination of load testing and the dashboard helped us](#how-a-combination-of-load-testing-and-the-dashboard-helped-us)
     - [Create a CPU usage alert for your app instance → you should get a notification sent your email](#create-a-cpu-usage-alert-for-your-app-instance--you-should-get-a-notification-sent-your-email)
+- [Securing the DB with a DMZ subnet](#securing-the-db-with-a-dmz-subnet)
+  - [Steps for Code-along](#steps-for-code-along)
+- [Task: Research VM availability options on Azure](#task-research-vm-availability-options-on-azure)
+    - [What is an availability set? How do they work? Advantages/disadvantages?](#what-is-an-availability-set-how-do-they-work-advantagesdisadvantages)
+    - [What is an availability zone? Why superior to an availability set? Disadvantages?](#what-is-an-availability-zone-why-superior-to-an-availability-set-disadvantages)
+  - [What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?](#what-is-a-virtual-machine-scale-set-what-type-of-scaling-does-it-do-how-does-it-work-limitations)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -372,7 +378,7 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 - install ```npm install```
 - db should be seeded, if the ip/post page is empty use ```node seeds/seed.js``` then npm start 
 
-## TASK: Stage 1, Create a provisions script to run app in the background
+## Task: Stage 1, Create a provisions script to run app in the background
 
 use the & in your script 
 write app script
@@ -401,7 +407,7 @@ ALSO!
   - change NSG rules to allow to port 3000
   - check at *IP address*:3000
 
-## TASK: stage 2, Create a provisions script for mongo DB 
+## Task: stage 2, Create a provisions script for mongo DB 
 
 - create the provisions script ```nano prov-db.sh```
 
@@ -480,8 +486,8 @@ location / {
 
 
 
-## VM SECURITY
-  nsg 
+## VM security
+NSG - Network ... 
 - Go to network settings on app vm
 - go to inbound security rules
 - on allows private key that user has, BUT an IP can try to ssh into out machine
@@ -503,6 +509,7 @@ using ```&``` to run in background isn't good bc you'll have to find and kill th
 3. you can use the command ```pm2 stop npm``` If you have multiple processes managed by PM2 that were started with the npm -- start, you can stop them all using this command. This effectively halts the application, but does not remove it from PM2's process list
 4.  and ```pm2 restart npm``` to This command restarts the running process associated with the npm command. PM2 will first stop the current instance and then start it again, ensuring any updates or changes are applied
 5.  use ```pm2 stop all``` to stop all previous process so the script is usable multiple times
+6.  to stop the app when running using user data and using pm2, you need to kill pm2 (the process manager) gracefully and then kill the child process
 
 
 Work out ways to both run, stop and re-start the app in the background (besides using the "&" at the end of the command):
@@ -520,7 +527,9 @@ This allows us to use the public IP without specifying which port the app is run
 the -i means replace 
 
 use the sed command to replace the Bind IP 
-```sed -i '0,/location \/ {/s//location \/ {\n        proxy_pass http:\/\/localhost:3000;/' /etc/nginx/sites-available/default```
+```
+sed -i '0,/location \/ {/s//location \/ {\n        proxy_pass http:\/\/localhost:3000;/' /etc/nginx/sites-available/default
+```
 
 ```
 sudo sed -i 's|try_files $uri $uri/ =404;|proxy_pass http://localhost:3000;|' /etc/nginx/sites-available/default
@@ -543,6 +552,11 @@ you can test using ```sudo nginx -t```
   2. nginx home page
   3. 502 error: bad gateway - while the app begins to run
   4. app displays
+- when restarting the app - connected to the db 
+  1. cd into root direc ```cd /repo/app```
+  2. Set mongodb env. var.```export DB_HOST="mongodb://*DB IP*:27017/posts"```
+  3. use sudo to act as super user but the ```-E``` allows the program to access the env. var. in non super user space ```sudo -E pm2 start app.js``` 
+
 
 
 
@@ -588,6 +602,7 @@ level 4: use an image + some user data (prov-app-starting-code.sh) to make thing
 #### How can you increase the management of a vm crash
 ![alt text](<images/alert mangement image.png>)
 
+
 #### Types of scaling
 ![alt text](<images/types of scaling.png>)
 
@@ -626,7 +641,7 @@ To find out what an appropriate threshold is required for an alarm system
    1. it is a very small app with simple code and therefore doesn't need much cpu
    2. the tool throws lots of requests to the app- just for testing
 4. install apache ```sudo apt-get install apache2-utils -y```
-5. ``` ab -n 1000 -c 100 http://20.162.241.78/``` command sends 1000 req. in blocks of 100, and add your IP where it says http 
+5. ``` ab -n 1000 -c 100 http://20.26.235.114/``` command sends 1000 req. in blocks of 100, and add your IP where it says http 
 6. spike from the first 1000 req.
 ![alt text](<images/1000 reg. spike.png>)
 1. tells you on your github details about how long each request takes 
@@ -635,12 +650,13 @@ To find out what an appropriate threshold is required for an alarm system
 4.  ![alt text](<images/req. times out.png>)
 
 ## Azure VM Scale Set (aka Auto scaling on AWS)
+The aim of this scale set to achieve high availability (multiple availability zones and multiple vms as a minimum- determined by load/performance testing) and high 
+scalability (multiple vms or vm scales up). 
 
 #### AZ VM scale set architecture  
 ![alt text](<images/az scale set arc..png>)
 
-The aim of this scale set to achieve high availability (multiple zones and multiple vms) and high 
-scalability (multiple vms). 
+
 #### How to make a scale set
 1. search vm scale set
 2. create
@@ -660,7 +676,7 @@ scalability (multiple vms).
        2.  name using standard name convention
        3.  keep it public
        4.  can change backend port (load balancer rule) to the port we used ie 3000 (if we didn't have the nginx config.)
-       5.  inbound NAT rile- theres an increment of 1 in the inbound port per vm to ssh into the vm (port number re. to know which port your vm is in)
+       5.  inbound NAT rule- theres an increment of 1 in the inbound port per vm to ssh into the vm (port number re. to know which port your vm is in)
        6.  create
 7. go to health
 8. enable app health monitoring
@@ -672,7 +688,7 @@ scalability (multiple vms).
 2.  create
 3.  re restarting - start and then click reimage to userdata to restart again- copying the image over again
 4.  can upgrade image to all vms
-5.  check instances to see your vms and their health
+5.  check instances to see your vms and their health - only marks it if the instance is running
 6.  to test - use load balancers ip address to view app 
 7.  to ssh in =to one of your vms
     1.  go to instances 
@@ -685,6 +701,7 @@ scalability (multiple vms).
      2.  public ip 
      3.  load balancers
      4.  NSG for all the NIC
+   
 
 #### Documentation about load balancers
 
@@ -700,6 +717,13 @@ A load balancer is a service that distributes incoming network traffic across mu
   4. delete one of your instances
   5. the next one the load balancer creates will be unhealthy
   6. it is marked as unhealthy because in the user data that runs initial script doesn't have a command to run the app
+
+  1. you can just stop and restart the instance, it will become unhealthy
+  2. it is marked that way bc user data won't run again until you reimage
+ 
+  1. ssh in and cd into root folder and stop/kill the app
+  2. there will be no app running and it the instance will be unhealthy
+
 
 - steps on how to SSH into an instance
   
@@ -718,10 +742,11 @@ To delete, select:
      4.  NSG for all the NIC
 
 
-## TASK: Azure Monitoring & Alert Management  
+## Task: Azure Monitoring & Alert Management
+
 Document what was done in the code-along, including...
 
-##### What is worst to best in terms of monitoring and responding to load/traffic.
+#### What is worst to best in terms of monitoring and responding to load/traffic.
 The worst is manual monitoring. Manually checking the vm metrics and making adjustments when there is a chance of crashing.
 
 Next, using a monitor to keep an eye on the metrics but this must also be manually monitored and responded to.
@@ -731,7 +756,7 @@ Next, the use of an alarm improves automation further as you'll receive an alert
 The best is to use a monitor, alert management and a load balancer. The load balancer will scale up or down your system in response to the metrics of all your vms and therefore handle load before a crash
 ![alt text](<images/alert mangement image.png>)
 
-##### How you setup a dashboard
+#### How you setup a dashboard
 (to turn on the app again after you must manually ssh in and start it)
 1. go to monitoring tab
    - cpu average
@@ -751,8 +776,8 @@ The best is to use a monitor, alert management and a load balancer. The load bal
    1. click the metric you want change the time frame for 
    ![alt text](<images/change time settings.png>)
    
-##### How a combination of load testing and the dashboard helped us
-The load testing allows us to increase the work that the vm was doing in order to completes the requests and therefire when the requests timed out we can see on the dashboard when the vm was unable to sustain the load and therefore the limit on the CPU usage 
+#### How a combination of load testing and the dashboard helped us
+The load testing allows us to increase the work that the vm was doing in order to completes the requests and therefore when the requests timed out we can see on the dashboard when the vm was unable to sustain the load and therefore the limit on the CPU usage 
 Include a screenshot of your dashboard when you manage to get it to stop responding through extreme load testing
 ![alt text](<images/req. times out.png>)
 ![alt text](<images/1000 reg. spike.png>)
@@ -762,15 +787,141 @@ Include a screenshot of your dashboard when you manage to get it to stop respond
 
 Document...
 - How to setup CPU usage alert
-- Include a screenshot of the email you received as a notification
+1.  Run the load testing using apache ```ab -n 10000 -c 200 http://20.26.235.114/```
+    [alt text](<images/load testing.png>)
+2. go to monitoring
+3. drop down and click alerts
+4. create and set your limits (CPU percentage- 6%)
+5. run the load test again
+6. can use apache OR stress
+7. ```sudo apt-get install stress``` install
+8. ```stress --cpu 4 --timeout 300``` cpu 4 = 4 cpu workers, time out after 300 seconds
+9. should show an alert in the alert window
+  ![alt text](images/alert.png)
+1.  should receive an email too
+  ![alt text](<images/email alert.png>)
 
-Post a link to your documentation in the chat by Mon 9:30
-In Azure, remove your dashboards and alert and action group
-Document...
-How to clean up for this task
-Link to help with Step 2 above: https://www.stephenhackers.co.uk/azure-monitoring-alert-on-virtual-machine-cpu-usage/
+## Securing the DB with a DMZ subnet
 
-Hints:
 
-You need to set the threshold low enough that the CPU utilization will trigger an alert when you do heavy load testing and you get an email notification
-During cleanup: After deleting your alert, you will still need to delete your action group
+ Our private subnet currently doesn't have anymore security than our public
+
+ current subnet allows communication between vms in the same subnet
+  - if add a nsg rule that stops this
+  - you must then allow db vm to allow communication from the MONGODB database by allowing traffic from it's port - (27017)
+  - by default vnet comms is not allowed 
+
+if you just delete your public ip for your db subnet then you can ssh in through a public vm and ssh into your priv vm- you must include port and have the private key for the private vm on your public vm
+
+nva (network virtual appliance) - filters any traffic that wants to access to the db, only legit traffic from correct source
+ - to force the traffic to go a particular direction, a route table is used
+ - the traffic out of the public subnet, and the "next hop"
+ - goes to the nsg group of the nva vm and is checked 
+   - in the nic of the nva db IP forwarding is enabled
+   - in the actual nva vm IP forwarding also needs to set up
+   - also IP tables (often used in firewalls) basically acting as a fire wall for your db
+ - and then the forwarded (filtered) traffic goes to the private subnet that and therefore the db vm
+![alt text](<images/3 subnet diagram.png>)
+
+### Steps for Code-along
+1. set up a new vnet - 3 subnet version
+   1.  create 3 subnets and name then appropriately
+   2.  give the addresses 10.0.2.0 for the public, 3 for the dmz and 4 for the private subnet
+   3. for the private subnet enable the no outbound access - this mean whatever is in the subnet cannot access the internet 
+   ![alt text](images/3vnet.png)
+   1. tag yourself as owner
+   2. create
+1. Create db vm from image
+   1. go to your ready-to-run-db image 
+   2. create a vm 
+   3. name appropriately ![alt text](<images/3 vnet 1.png>)
+   4. for availability- self select and db in zone 3
+   5. allow ssh (for now)
+   6. disk as normal
+   7. networking - choose the right vnet and subnet, no public ip
+   ![alt text](<images/3 vnet 2.png>)
+2. Create the app vm from image
+   1. go to your ready-to-run-app image 
+   2. create a vm 
+   3. name
+   4. for availability- self select and db in zone 1
+   5. allow http and ssh
+   6. disk as normal
+   7. networking - choose the right vnet (3 subnet vnet) and subnet (public)
+3. Create NVA vm
+   1. create with ramons's clean image image
+   2. name
+   3. for availability- self select and db in zone 2
+   4. allow just ssh
+   5. disk as usual
+   6. networking - choose the right vnet (3 subnet vnet) and subnet (dmz)
+   7. give public ip (for now) to allow us to ssh in
+   8. no user data - can upgrade and update when we ssh in
+   9. create
+4. Set a ping (sends a packet regularly) to check the comms between the app and the db vms
+   1. ssh into the app vm
+   2. we want to ping the db vm ```ping 10.0.4.4```
+   3. each message is the db replying and it also tells you how long the response takes (ctrl c/z to exit)
+    ![alt text](<images/3 vnet 3.png>)
+5. set up routing (using a routing table)
+   1. search route table on az
+   2. create
+   ![alt text](<images/3vnet 4.png>)
+   1. go to resources
+   2. add a route 
+   3. name it 
+   4. the destination type is IP addresses
+   5. the final destination is our private db vm so put that IP range there
+   6. the next hop type is virtual appliance - our NVA
+   7. the next hop address is the private IP of the DMZ subnet
+  ![alt text](<images/3 vnet 5.png>)
+  1.  Associate the route with where the info will be coming from - our public IP address
+  2.  go to subnets on the side menu
+  3.  add associate
+  4.  fill in like so
+![alt text](<images/3 vnet 6.png>)
+  1.  if you check the git bash window with the ping, you can see the app has stopped receiving packets because we've sent traffic to our NVA machine the traffic hasn't been forwarded to DB machine
+
+## Task: Research VM availability options on Azure
+
+#### What is an availability set? How do they work? Advantages/disadvantages?
+
+An availability set is a group feature that ensures VMs within the set are distributed across multiple isolated hardware resources.
+
+They work by dividing the physical severs within a data center into different Fault Domains. Each fault domain has it's own servers, network switches, power supplies so if there is a failure some servers will still be running. 
+
+Advantages:
+Increased Uptime
+Resilience Against Single Points of Failure
+Cost-Effective
+Guaranteed Availability
+
+Disadvantages:
+Does Not Span Regions
+Limited to Single Data Center
+
+#### What is an availability zone? Why superior to an availability set? Disadvantages?
+An Availability Zone is a physically separate zone within an Azure region. Each zone has its own power, cooling, and networking, making it isolated from other zones in the region.
+ 
+Advantages
+Higher Fault Tolerance:
+ Availability Zones protect against data center-level failures. VMs placed in different zones are isolated from each other geographically, offering protection against natural disasters or regional failures.
+
+Zone-level Redundancy:
+ With Availability Zones, Azure guarantees a 99.99% Service Level Agreement for VMs.
+
+### What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?
+
+ A vm scale set allows you to automatically create and manage a group of identical, load-balanced VMs. It’s designed to automatically scale in response to demand.
+
+Horizontal scaling:
+
+Scale Out: This adds more instances of virtual machines (VMs) to handle increased demand.
+
+Scale In: This reduces the number of VM instances when the demand decreases.
+ 
+Vertical scaling:
+
+Scale Up: This increases the resources (CPU, memory, disk) allocated to the existing VMs without changing the number of instances.
+
+Scale Down: This decreases the resources allocated to the VMs when the high-performance requirements are no longer necessary.
