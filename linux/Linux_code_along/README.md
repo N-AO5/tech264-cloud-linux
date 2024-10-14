@@ -46,6 +46,13 @@
     - [Now for some load testing](#now-for-some-load-testing)
 - [Azure VM Scale Set (aka Auto scaling on AWS)](#azure-vm-scale-set-aka-auto-scaling-on-aws)
     - [AZ VM scale set architecture](#az-vm-scale-set-architecture)
+    - [How to make a scale set](#how-to-make-a-scale-set)
+    - [Documentation about load balancers](#documentation-about-load-balancers)
+- [TASK: Azure Monitoring \& Alert Management](#task-azure-monitoring--alert-management)
+      - [What is worst to best in terms of monitoring and responding to load/traffic.](#what-is-worst-to-best-in-terms-of-monitoring-and-responding-to-loadtraffic)
+      - [How you setup a dashboard](#how-you-setup-a-dashboard)
+      - [How a combination of load testing and the dashboard helped us](#how-a-combination-of-load-testing-and-the-dashboard-helped-us)
+    - [Create a CPU usage alert for your app instance → you should get a notification sent your email](#create-a-cpu-usage-alert-for-your-app-instance--you-should-get-a-notification-sent-your-email)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -105,7 +112,7 @@
 - ```nl *filename* ```numbers the lines in the file
 - piping (|), output from one file and input into another
   - ``` cat *file name* | grep *text you want to to search for*``` output the files and uses grep to search for text 
-  ![alt text](image-1.png)
+  ![alt text](<images/grep command.png>)
 - ``` cd /``` cd into the top of the direc tree, root direc [BE CAREFUL CAN BREAK]
 
 
@@ -116,7 +123,7 @@ root in linux is the super user- all permissions
 
 - ```sudo apt(-get) update -y``` to update the package list from a source list, the ```-y``` means yes to any prompted questions
 - ``` sudo apt install *package*```
-  -  eg. tree package (allows you to see files ina different way to ls) which does this: ![alt text](image-2.png)
+  -  eg. tree package (allows you to see files ina different way to ls) which does this:![alt text](images/image-2.png)
 - ``` sudo apt upgrade -y```upgrade all the packages installed CAN BREAK OS (sys software may need/already running a specific version of a specific package)
 
 ### Running Multiple Commands as the Super User
@@ -131,10 +138,10 @@ root in linux is the super user- all permissions
   - ``` .sh ``` means shell
 - must specify the shell to specify which shell to use to run the scripts 
   - ``` #!*path to bash shell* ```
-  - ![alt text](image.png)
+  - ![alt text](images/image.png)
 - plan the script file
-  ![alt text](image-3.png)
-- we know these commands work as we have tested them manually so we can put them straight into the script![alt text](image-4.png) 
+  ![alt text](images/image-3.png)
+- we know these commands work as we have tested them manually so we can put them straight into the script![alt text](images/image-4.png)
 - Now test the command to install nginx
   - ctrl s & ctrl x to save and exit the script
   - back in the terminal test the command
@@ -150,8 +157,8 @@ root in linux is the super user- all permissions
 - ctrl z to get out
 - ```sudo systemctl restart nginx``` restart nginx
 - ```sudo systemctl enable nginx``` enable ngix - enabling means it will automatically run when VM is logged into again
-- completed:
-  ![alt text](image-5.png)
+- completed:![alt text](images/image-5.png)
+ 
 - ```chmod +x provision.sh``` you need to add permissions to execute
 - ```./provision.sh ```run the script,
   - "." means the script is in the current direc.
@@ -169,14 +176,14 @@ They can be set by your sys(windows/linux) but you can do it to
 This environment variable we are setting up contains info about where to go to find a database.
 
  - ```printenv``` prints out environment variables onto the screen
-- ```printenv *env variable name* ``` print out just one env variable, match the caplocks ![alt text](image-6.png)
-  
+- ```printenv *env variable name* ``` print out just one env variable, match the caplocks 
+  ![alt text](images/image-6.png)
 #### Set a Variable (for a script)
-- use caplocks to write the variable name then "=" ![alt text](image-7.png)
-- to see a normal variable use ``` echo $*variablename*``` ![alt text](image-8.png)
-  
+- use caplocks to write the variable name then "=" ![alt text](images/image-7.png)
+- to see a normal variable use ``` echo $*variablename*```
+  ![alt text](images/image-8.png)
 #### Set an Environment Variable
-- ```export *set the name and value*``` set like with a normal variable ![alt text](image-9.png)
+- ```export *set the name and value*``` set like with a normal variable ![alt text](images/image-9.png)
   
 #### Set a Persistent Variable
 
@@ -184,13 +191,13 @@ This environment variable we are setting up contains info about where to go to f
 - To allow a env var to stay when you log out and log in - persistence
   - set env var in the ```.bashrc``` file in your home direc. that loads up every time you log in
   - so it will be set that the variable will still exist if you log in as that user
-  -  ```nano .bashrc``` nano into the .bashrc file and add the env. var. in that file ![alt text](image-10.png)
+  -  ```nano .bashrc``` nano into the .bashrc file and add the env. var. in that file ![alt text](images/image-10.png)
   -  log out and log back in and it will be there is you print env. var.
 - Make your env. var. persistent WITHOUT nano'ing into the ```.bashrc``` file
   - ```echo "export *variablename=variablevlaue" >> .bashrc```use echo and put into quotes, it takes the output from the echo command and puts it the file
   - ```>``` will replace EVERYTHING in the .bashrc file 
   - ```>>``` will APPEND the output to the bottom of the ```.bashrc``` file 
-- eg. ![alt text](image-12.png)
+- eg. ![alt text](images/image-12.png)
 
 ##### Option 2- avoid having to ssh in and out to reload the .bashrc file
 - ```source.bashrc``` to assign the env. var. and reload the config and therefore reload the export command
@@ -203,7 +210,7 @@ When running (executing a program) one core is needed, if multiple processes are
 
 ### User Processes
 Processes that a user had run on a terminal - associated with a terminal session
-![alt text](image-13.png)
+![alt text](images/image-13.png)
 ^ this shows the user processes running, use the command ```ps```
 
 TTY is the terminal session ID ```pts/0``` means first terminal logged in
@@ -212,7 +219,7 @@ TTY is the terminal session ID ```pts/0``` means first terminal logged in
 - To see ALL the processes use ``` ps -A``` 
 - ```ps -aux```shows ALL the information about ALL the processes
 - almost every process is started by another
-![alt text](image-14.png)
+![alt text](images/image-14.png)
 ^ Highlighted is the process ID
 - shift + m shows the process using up the memory
 - shift + n shows the newest processes
@@ -222,15 +229,15 @@ TTY is the terminal session ID ```pts/0``` means first terminal logged in
 - ```sleep *num"```sleep command causes a delay in seconds incase the previous command hasn't been fully configed yet- running in the foreground
 - ``` sleep *num* &``` running in the background
   - will give you a process id
-   ![alt text](image-15.png)
-- ```jobs``` shows you processes![alt text](image-16.png)
+   ![alt text](images/image-15.png)
+- ```jobs``` shows you processes![alt text](images/image-16.png)
 
 #### Killing a Process
 - ctrl + z can stop a process in the foreground
 - ``` kill -1 *process id*``` hang up signal to gently stop a process
 - ``` kill *process id*``` terminate slightly harsher kill signal (level 15)
 - ```kill -9 *process id*``` brute force kill signal (level 9)
-  ![alt text](image-17.png)
+  ![alt text](images/image-17.png)
 - Be vary using brute force bc:
   - A tool (process manager - also a process) can be used to manage other process
   - a process can run and use on a specific port
@@ -247,7 +254,7 @@ TTY is the terminal session ID ```pts/0``` means first terminal logged in
 - do your sudo apt update and upgrade- do this to check that command wont ask for user input bc of a different image on a different VM
 - if it asks for user input "tab + enter"
 - to make sure upgrade doesn't ask for user input on a FRESH vm use ```sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y``` 
-- install nginx and add the DEBIAN to make sure it's not interactive (no user inputs)![alt text](image-18.png) 
+- install nginx and add the DEBIAN to make sure it's not interactive (no user inputs)![alt text](images/image-18.png) 
   ```sudo DEBIAN_FRONTEND=noninteractive apt-get install nginx -y```
   
 ### Install dependency (for our app)
@@ -293,7 +300,7 @@ echo Done!
 ### move the scp (secure copy) to copy app folder into the home direc of the VM (app)
 - unzip the file with the app data in it
 - copy the unzipped app code an place in a file "app" in your vm
-  - ```scp -i <path_to_private_key> <local_file_path> <username>@<remote_host>:<remote_directory_path>``` use the scp command to move the app code ![alt text](image-22.png)
+  - ```scp -i <path_to_private_key> <local_file_path> <username>@<remote_host>:<remote_directory_path>``` use the scp command to move the app code ![alt text](images/image-22.png)
 
 ### move git/git clone to copy app folder into the home  direc of the VM (app)
 - ssh into your app vm
@@ -316,13 +323,13 @@ sudo apt-get install git```
 - make sure there are 0 vulnerabilities
 - when installed now we run (this is just the front page)
 - ```node app.js``` to run the app
-  ![alt text](image-19.png)
+  ![alt text](images/image-19.png)
 - when you go to a IP address is will default port 480
 - add access in NIC rules 
   - go to your VM and go to network setting to change the inbound destination to port 3000
   - the lower the priority number, the higher the priority
-   ![alt text](image-21.png)
-- add :*port number* to go to the required port number in the url ![alt text](image-20.png)
+   ![alt text](images/image-21.png)
+- add :*port number* to go to the required port number in the url ![alt text](images/image-20.png)
 - ctrl + z to stop the app running 
 
 ## Create another VM for app database 
@@ -432,7 +439,7 @@ sparta runs in the back ground- use a process manager pm2 to stop the process ra
 - to get to our app you have to add the port number for the app
 - to fix this - we need something to redirect traffic to port 3000 when we go to the public IP
 
-![alt text](image-23.png)
+![alt text](images/image-23.png)
 
 - ```sudo cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup``` to copy and therefore back up the nginx config file
 -```/etc/nginx/sites-available``` into the nginx file 
@@ -553,7 +560,7 @@ level 4: use an image + some user data (prov-app-starting-code.sh) to make thing
   - can be used to start new vm with the same set of files
   - remember you still need to run the app to get it started (the extra lil user data)
 
-![alt text](image-28.png)
+![alt text](images/image-28.png)
 
 ### Create an new VM using Ramon's image
 - create both app vm and db vm
@@ -566,13 +573,13 @@ level 4: use an image + some user data (prov-app-starting-code.sh) to make thing
 1. go to resource for your vm
 2. capture -> image
 3. select these:
-  ![alt text](image-24.png)
+  ![alt text](images/image-24.png)
   if you tick that box then the vm delete after you create the image - your vm will be unusable post image creation
 4. rename to a suitable name 
-  ![alt text](image-25.png)
+  ![alt text](images/image-25.png)
 5. run this command when you ssh into your vm
-  ![alt text](image-26.png)
-  ![alt text](image-27.png)
+  ![alt text](images/image-26.png)
+  ![alt text](images/image-27.png)
   ```sudo waagent -deprovision+user```
   it allows you to delete all the user data ready to be image 
 6. then you can click create
@@ -595,7 +602,7 @@ we create an app vm using the images previously created
    - can see more metrics if you click link at the bottom
 2. click the pin on the CPU average 
 3. make a new, shared dashboard and fill in
-![alt text](image.png)
+![alt text](<images/pin dashbpard.png>)
 4. add network total and disk operations metrics onto the dashboard 
 5. search dashboards at the top 
 6. click your dashboard
@@ -605,7 +612,7 @@ we create an app vm using the images previously created
    3. remember to save
 8. to see the last 30 mins for example
    1. click the metric you want change the time frame for 
-   2. ![alt text](image.png)
+![alt text](<images/change time settings.png>)
 
 #### Now for some load testing
 To find out what an appropriate threshold is required for an alarm system
@@ -617,30 +624,30 @@ To find out what an appropriate threshold is required for an alarm system
 2. check that the app is working if you check you public IP address 
 3. use a tool to increase the CPU (central processing unit)- 
    1. it is a very small app with simple code and therefore doesn't need much cpu
-   2. the tool throws lots of requests to the app- juts for testing
+   2. the tool throws lots of requests to the app- just for testing
 4. install apache ```sudo apt-get install apache2-utils -y```
 5. ``` ab -n 1000 -c 100 http://20.162.241.78/``` command sends 1000 req. in blocks of 100, and add your IP where it says http 
 6. spike from the first 1000 req.
-![alt text](<1000 reg. spike.png>)
+![alt text](<images/1000 reg. spike.png>)
 1. tells you on your github details about how long each request takes 
 2. next inc. values ```ab -n 10000 -c 200 http://20.162.241.78/``` 10 thousand req. in blocks of 200.
 3. it processes much slower then times out
-4.  ![alt text](<req. times out.png>)
+4.  ![alt text](<images/req. times out.png>)
 
 ## Azure VM Scale Set (aka Auto scaling on AWS)
 
 #### AZ VM scale set architecture  
-![alt text](<az scale set arc..png>)
+![alt text](<images/az scale set arc..png>)
 
 The aim of this scale set to achieve high availability (multiple zones and multiple vms) and high 
 scalability (multiple vms). 
-
+#### How to make a scale set
 1. search vm scale set
 2. create
 3. fill in like so:
-   ![alt text](<scale set 1.png>)
+   ![alt text](<images/scale set 1.png>)
 1. select autoscaling
-2. adjust scaling config ![alt text](<scale set 2.png>)
+2. adjust scaling config ![alt text](<images/scale set 2.png>)
 3. add your image (you made)
 4. fill rest as usual
 5. do disc - standard ssd
@@ -658,7 +665,7 @@ scalability (multiple vms).
 7. go to health
 8. enable app health monitoring
 9. enable auto repairs - replace and wait 10 mins before going in to repair
-![alt text](<scale set 3.png>)
+![alt text](<images/scale set 3.png>)
 10. in the advanced tab,tick user data and add your RUN APP ONLY script
 [run-app-only](run-app-only.sh)
 1.  tag yourself
@@ -679,7 +686,7 @@ scalability (multiple vms).
      3.  load balancers
      4.  NSG for all the NIC
 
-Document:
+#### Documentation about load balancers
 
 - what is a load balancer and why it is needed
 how to manage instances
@@ -711,4 +718,59 @@ To delete, select:
      4.  NSG for all the NIC
 
 
+## TASK: Azure Monitoring & Alert Management  
+Document what was done in the code-along, including...
 
+##### What is worst to best in terms of monitoring and responding to load/traffic.
+The worst is manual monitoring. Manually checking the vm metrics and making adjustments when there is a chance of crashing.
+
+Next, using a monitor to keep an eye on the metrics but this must also be manually monitored and responded to.
+
+Next, the use of an alarm improves automation further as you'll receive an alert when the metrics are abnormally (eg the CPU is too high) which will allow you to manually adjust.
+
+The best is to use a monitor, alert management and a load balancer. The load balancer will scale up or down your system in response to the metrics of all your vms and therefore handle load before a crash
+![alt text](<images/alert mangement image.png>)
+
+##### How you setup a dashboard
+(to turn on the app again after you must manually ssh in and start it)
+1. go to monitoring tab
+   - cpu average
+   - disk bytes
+   - can see more metrics if you click link at the bottom
+2. click the pin on the CPU average 
+3. make a new, shared dashboard and fill in
+![alt text](<images/pin dashbpard.png>)
+1. add network total and disk operations metrics onto the dashboard 
+2. search dashboards at the top 
+3. click your dashboard
+4. can rearrange dashboards
+   1. click edit (lil pencil)
+   2. rearrange by dragging and dropping
+   3. remember to save
+5. to see the last 30 mins for example
+   1. click the metric you want change the time frame for 
+   ![alt text](<images/change time settings.png>)
+   
+##### How a combination of load testing and the dashboard helped us
+The load testing allows us to increase the work that the vm was doing in order to completes the requests and therefire when the requests timed out we can see on the dashboard when the vm was unable to sustain the load and therefore the limit on the CPU usage 
+Include a screenshot of your dashboard when you manage to get it to stop responding through extreme load testing
+![alt text](<images/req. times out.png>)
+![alt text](<images/1000 reg. spike.png>)
+
+#### Create a CPU usage alert for your app instance → you should get a notification sent your email
+- Get the alert to check the average for each minute
+
+Document...
+- How to setup CPU usage alert
+- Include a screenshot of the email you received as a notification
+
+Post a link to your documentation in the chat by Mon 9:30
+In Azure, remove your dashboards and alert and action group
+Document...
+How to clean up for this task
+Link to help with Step 2 above: https://www.stephenhackers.co.uk/azure-monitoring-alert-on-virtual-machine-cpu-usage/
+
+Hints:
+
+You need to set the threshold low enough that the CPU utilization will trigger an alert when you do heavy load testing and you get an email notification
+During cleanup: After deleting your alert, you will still need to delete your action group
