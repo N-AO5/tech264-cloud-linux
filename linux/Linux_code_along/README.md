@@ -788,7 +788,7 @@ Include a screenshot of your dashboard when you manage to get it to stop respond
 Document...
 - How to setup CPU usage alert
 1.  Run the load testing using apache ```ab -n 10000 -c 200 http://20.26.235.114/```
-    [alt text](<images/load testing.png>)
+   ![alt text](<images/load testing.png>)
 2. go to monitoring
 3. drop down and click alerts
 4. create and set your limits (CPU percentage- 6%)
