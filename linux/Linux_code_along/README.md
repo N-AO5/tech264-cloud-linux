@@ -53,12 +53,13 @@
     - [How you setup a dashboard](#how-you-setup-a-dashboard)
     - [How a combination of load testing and the dashboard helped us](#how-a-combination-of-load-testing-and-the-dashboard-helped-us)
     - [Create a CPU usage alert for your app instance → you should get a notification sent your email](#create-a-cpu-usage-alert-for-your-app-instance--you-should-get-a-notification-sent-your-email)
-- [Securing the DB with a DMZ subnet](#securing-the-db-with-a-dmz-subnet)
-  - [Steps for Code-along](#steps-for-code-along)
+    - [Removing Dashboard, Alerts, and Action groups](#removing-dashboard-alerts-and-action-groups)
 - [Task: Research VM availability options on Azure](#task-research-vm-availability-options-on-azure)
     - [What is an availability set? How do they work? Advantages/disadvantages?](#what-is-an-availability-set-how-do-they-work-advantagesdisadvantages)
     - [What is an availability zone? Why superior to an availability set? Disadvantages?](#what-is-an-availability-zone-why-superior-to-an-availability-set-disadvantages)
   - [What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?](#what-is-a-virtual-machine-scale-set-what-type-of-scaling-does-it-do-how-does-it-work-limitations)
+- [Securing the DB with a DMZ subnet](#securing-the-db-with-a-dmz-subnet)
+  - [Steps for Code-along](#steps-for-code-along)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -741,7 +742,7 @@ To delete, select:
      3.  load balancers
      4.  NSG for all the NIC
 
-
+---
 ## Task: Azure Monitoring & Alert Management
 
 Document what was done in the code-along, including...
@@ -756,6 +757,7 @@ Next, the use of an alarm improves automation further as you'll receive an alert
 The best is to use a monitor, alert management and a load balancer. The load balancer will scale up or down your system in response to the metrics of all your vms and therefore handle load before a crash
 ![alt text](<images/alert mangement image.png>)
 
+<hr>
 #### How you setup a dashboard
 (to turn on the app again after you must manually ssh in and start it)
 1. go to monitoring tab
@@ -764,7 +766,9 @@ The best is to use a monitor, alert management and a load balancer. The load bal
    - can see more metrics if you click link at the bottom
 2. click the pin on the CPU average 
 3. make a new, shared dashboard and fill in
+   
 ![alt text](<images/pin dashbpard.png>)
+
 1. add network total and disk operations metrics onto the dashboard 
 2. search dashboards at the top 
 3. click your dashboard
@@ -774,35 +778,91 @@ The best is to use a monitor, alert management and a load balancer. The load bal
    3. remember to save
 5. to see the last 30 mins for example
    1. click the metric you want change the time frame for 
+   
    ![alt text](<images/change time settings.png>)
    
 #### How a combination of load testing and the dashboard helped us
 The load testing allows us to increase the work that the vm was doing in order to completes the requests and therefore when the requests timed out we can see on the dashboard when the vm was unable to sustain the load and therefore the limit on the CPU usage 
 Include a screenshot of your dashboard when you manage to get it to stop responding through extreme load testing
+
 ![alt text](<images/req. times out.png>)
+
+<br>
+
 ![alt text](<images/1000 reg. spike.png>)
 
 #### Create a CPU usage alert for your app instance → you should get a notification sent your email
-- Get the alert to check the average for each minute
 
-Document...
 - How to setup CPU usage alert
 1.  Run the load testing using apache ```ab -n 10000 -c 200 http://20.26.235.114/```
    ![alt text](<images/load testing.png>)
 2. go to monitoring
 3. drop down and click alerts
 4. create and set your limits (CPU percentage- 6%)
-5. run the load test again
-6. can use apache OR stress
-7. ```sudo apt-get install stress``` install
-8. ```stress --cpu 4 --timeout 300``` cpu 4 = 4 cpu workers, time out after 300 seconds
-9. should show an alert in the alert window
+[ADD MORE DETAILS ON ACTION GROUPS]
+1. run the load test again
+2. can use apache OR stress
+3. ```sudo apt-get install stress``` install
+4. ```stress --cpu 4 --timeout 300``` cpu 4 = 4 cpu workers, time out after 300 seconds
+5.  should show an alert in the alert window
   ![alt text](images/alert.png)
-1.  should receive an email too
+
+1.   should receive an email too
   ![alt text](<images/email alert.png>)
 
-## Securing the DB with a DMZ subnet
+#### Removing Dashboard, Alerts, and Action groups
+- go to dashboard and remove there
+- action groups & alert rules
+  - go to your vm
+  - click alerts on your side menu
+  - click action groups and delete there
+  - click alert rules and delete there
 
+## Task: Research VM availability options on Azure
+
+#### What is an availability set? How do they work? Advantages/disadvantages?
+
+An availability set is a group feature that ensures VMs within the set are distributed across multiple isolated hardware resources.
+
+They work by dividing the physical severs within a data center into different Fault Domains. Each fault domain has it's own servers, network switches, power supplies so if there is a failure some servers will still be running. 
+
+Advantages:
+Increased Uptime
+Resilience Against Single Points of Failure
+Cost-Effective
+Guaranteed Availability
+
+Disadvantages:
+Does Not Span Regions
+Limited to Single Data Center
+
+#### What is an availability zone? Why superior to an availability set? Disadvantages?
+An Availability Zone is a physically separate zone within an Azure region. Each zone has its own power, cooling, and networking, making it isolated from other zones in the region.
+ 
+Advantages
+Higher Fault Tolerance:
+ Availability Zones protect against data center-level failures. VMs placed in different zones are isolated from each other geographically, offering protection against natural disasters or regional failures.
+
+Zone-level Redundancy:
+ With Availability Zones, Azure guarantees a 99.99% Service Level Agreement for VMs.
+
+### What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?
+
+ A vm scale set allows you to automatically create and manage a group of identical, load-balanced VMs. It’s designed to automatically scale in response to demand.
+
+Horizontal scaling:
+
+Scale Out: This adds more instances of virtual machines (VMs) to handle increased demand.
+
+Scale In: This reduces the number of VM instances when the demand decreases.
+ 
+Vertical scaling:
+
+Scale Up: This increases the resources (CPU, memory, disk) allocated to the existing VMs without changing the number of instances.
+
+Scale Down: This decreases the resources allocated to the VMs when the high-performance requirements are no longer necessary.
+
+## Securing the DB with a DMZ subnet
 
  Our private subnet currently doesn't have anymore security than our public
 
@@ -881,47 +941,3 @@ nva (network virtual appliance) - filters any traffic that wants to access to th
   4.  fill in like so
 ![alt text](<images/3 vnet 6.png>)
   1.  if you check the git bash window with the ping, you can see the app has stopped receiving packets because we've sent traffic to our NVA machine the traffic hasn't been forwarded to DB machine
-
-## Task: Research VM availability options on Azure
-
-#### What is an availability set? How do they work? Advantages/disadvantages?
-
-An availability set is a group feature that ensures VMs within the set are distributed across multiple isolated hardware resources.
-
-They work by dividing the physical severs within a data center into different Fault Domains. Each fault domain has it's own servers, network switches, power supplies so if there is a failure some servers will still be running. 
-
-Advantages:
-Increased Uptime
-Resilience Against Single Points of Failure
-Cost-Effective
-Guaranteed Availability
-
-Disadvantages:
-Does Not Span Regions
-Limited to Single Data Center
-
-#### What is an availability zone? Why superior to an availability set? Disadvantages?
-An Availability Zone is a physically separate zone within an Azure region. Each zone has its own power, cooling, and networking, making it isolated from other zones in the region.
- 
-Advantages
-Higher Fault Tolerance:
- Availability Zones protect against data center-level failures. VMs placed in different zones are isolated from each other geographically, offering protection against natural disasters or regional failures.
-
-Zone-level Redundancy:
- With Availability Zones, Azure guarantees a 99.99% Service Level Agreement for VMs.
-
-### What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?
-
- A vm scale set allows you to automatically create and manage a group of identical, load-balanced VMs. It’s designed to automatically scale in response to demand.
-
-Horizontal scaling:
-
-Scale Out: This adds more instances of virtual machines (VMs) to handle increased demand.
-
-Scale In: This reduces the number of VM instances when the demand decreases.
- 
-Vertical scaling:
-
-Scale Up: This increases the resources (CPU, memory, disk) allocated to the existing VMs without changing the number of instances.
-
-Scale Down: This decreases the resources allocated to the VMs when the high-performance requirements are no longer necessary.
