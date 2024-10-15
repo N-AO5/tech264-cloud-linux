@@ -27,14 +27,14 @@
 - [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
 - [Task: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
 - [Task: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
-- [Task:How many services can use a port](#taskhow-many-services-can-use-a-port)
+- [Task: How many services can use a port](#task-how-many-services-can-use-a-port)
 - [Task: Reverse proxy - would be in app script (after the install nginx file)](#task-reverse-proxy---would-be-in-app-script-after-the-install-nginx-file)
 - [VM security](#vm-security)
 - [Task: Run Sparta app in the background - using pm2](#task-run-sparta-app-in-the-background---using-pm2)
     - [What is pm2](#what-is-pm2)
     - [How to used pm2](#how-to-used-pm2)
 - [Task: Automate configuration of nginx reverse proxy](#task-automate-configuration-of-nginx-reverse-proxy)
-- [Task: User data](#task-user-data)
+- [Task: User data \& restarting the app vm](#task-user-data--restarting-the-app-vm)
 - [Levels of automation- Deploying out app on the cloud](#levels-of-automation--deploying-out-app-on-the-cloud)
   - [Create an new VM using Ramon's image](#create-an-new-vm-using-ramons-image)
   - [Create an image for our virtual machines](#create-an-image-for-our-virtual-machines)
@@ -58,7 +58,8 @@
     - [What is an availability set? How do they work? Advantages/disadvantages?](#what-is-an-availability-set-how-do-they-work-advantagesdisadvantages)
     - [What is an availability zone? Why superior to an availability set? Disadvantages?](#what-is-an-availability-zone-why-superior-to-an-availability-set-disadvantages)
   - [What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?](#what-is-a-virtual-machine-scale-set-what-type-of-scaling-does-it-do-how-does-it-work-limitations)
-- [Securing the DB with a DMZ subnet](#securing-the-db-with-a-dmz-subnet)
+- [Securing the DB with a DMZ subnet- 3 subnet vnet](#securing-the-db-with-a-dmz-subnet--3-subnet-vnet)
+    - [Quick increase of db w/o nva](#quick-increase-of-db-wo-nva)
   - [Steps for Code-along](#steps-for-code-along)
 
 ## What is Linux?
@@ -379,6 +380,7 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
 - install ```npm install```
 - db should be seeded, if the ip/post page is empty use ```node seeds/seed.js``` then npm start 
 
+---
 ## Task: Stage 1, Create a provisions script to run app in the background
 
 use the & in your script 
@@ -408,6 +410,7 @@ ALSO!
   - change NSG rules to allow to port 3000
   - check at *IP address*:3000
 
+----
 ## Task: stage 2, Create a provisions script for mongo DB 
 
 - create the provisions script ```nano prov-db.sh```
@@ -429,15 +432,10 @@ echo "Set env variable"
 printenv DB_HOST
 echo "env variable set."
 ```
-
-## Task:How many services can use a port
+---
+## Task: How many services can use a port
 
 Port 3000 is in use, kill the old process
-
-
-
-
-
 
 sparta runs in the back ground- use a process manager pm2 to stop the process rather than killing it
 
@@ -497,6 +495,7 @@ NSG - Network ...
   -but our public IP changes every time the router is restarted so you'll have to save my IP again
 - if this is a production server and you don't want ANYONE to ssh in- remove the rule or change action to deny
 
+---
 ## Task: Run Sparta app in the background - using pm2
 
 #### What is pm2
@@ -521,6 +520,7 @@ You should have already used "&" at the end the command to run the app in the ba
 Document the methods you got working
 Check the app is working in your browser at the IP address of the VM with :3000 appended to the end (or without port 3000 in the URL if your reverse proxy is running).
 
+---
 ## Task: Automate configuration of nginx reverse proxy
 This allows us to use the public IP without specifying which port the app is running, this is done by ngninx by changing the bind IP to 0.0.0.0.
 
@@ -538,7 +538,8 @@ sudo sed -i 's|try_files $uri $uri/ =404;|proxy_pass http://localhost:3000;|' /e
 
 you can test using ```sudo nginx -t```
 
-## Task: User data
+---
+## Task: User data & restarting the app vm
 - tick the box in tab before "tags" when creating a VM - only HTTP
 - Used to achieve next level automation
 - anything pasted (app script) into the user data box will run- 
@@ -557,8 +558,11 @@ you can test using ```sudo nginx -t```
   1. cd into root direc ```cd /repo/app```
   2. Set mongodb env. var.```export DB_HOST="mongodb://*DB IP*:27017/posts"```
   3. use sudo to act as super user but the ```-E``` allows the program to access the env. var. in non super user space ```sudo -E pm2 start app.js``` 
+[text](BASH_scripts/restart-app.sh)
 
 
+
+<BR>
 
 
 ## Levels of automation- Deploying out app on the cloud
@@ -607,6 +611,8 @@ level 4: use an image + some user data (prov-app-starting-code.sh) to make thing
 #### Types of scaling
 ![alt text](<images/types of scaling.png>)
 
+<br>
+
 ## Test Monitoring
 we create an app vm using the images previously created
 
@@ -649,6 +655,8 @@ To find out what an appropriate threshold is required for an alarm system
 2. next inc. values ```ab -n 10000 -c 200 http://20.162.241.78/``` 10 thousand req. in blocks of 200.
 3. it processes much slower then times out
 4.  ![alt text](<images/req. times out.png>)
+
+<br>
 
 ## Azure VM Scale Set (aka Auto scaling on AWS)
 The aim of this scale set to achieve high availability (multiple availability zones and multiple vms as a minimum- determined by load/performance testing) and high 
@@ -809,6 +817,7 @@ Include a screenshot of your dashboard when you manage to get it to stop respond
 
 1.   should receive an email too
   ![alt text](<images/email alert.png>)
+  
 
 #### Removing Dashboard, Alerts, and Action groups
 - go to dashboard and remove there
@@ -817,22 +826,24 @@ Include a screenshot of your dashboard when you manage to get it to stop respond
   - click alerts on your side menu
   - click action groups and delete there
   - click alert rules and delete there
-
+----
 ## Task: Research VM availability options on Azure
 
 #### What is an availability set? How do they work? Advantages/disadvantages?
 
 An availability set is a group feature that ensures VMs within the set are distributed across multiple isolated hardware resources.
 
-They work by dividing the physical severs within a data center into different Fault Domains. Each fault domain has it's own servers, network switches, power supplies so if there is a failure some servers will still be running. 
+They work by dividing the physical severs within a data center into different **Fault Domains**. Each fault domain has it's own servers, network switches, power supplies so if there is a failure some servers will still be running. 
 
-Advantages:
+**Update Domains** groups of VMS that are updated and rebooted at the same time, ensuring not all VMs are down at the same time
+
+**Advantages**:
 Increased Uptime
 Resilience Against Single Points of Failure
-Cost-Effective
+Cost-Effective - no added costs on AZ
 Guaranteed Availability
 
-Disadvantages:
+**Disadvantages**:
 Does Not Span Regions
 Limited to Single Data Center
 
@@ -844,32 +855,37 @@ Higher Fault Tolerance:
  Availability Zones protect against data center-level failures. VMs placed in different zones are isolated from each other geographically, offering protection against natural disasters or regional failures.
 
 Zone-level Redundancy:
- With Availability Zones, Azure guarantees a 99.99% Service Level Agreement for VMs.
+ With Availability Zones, Azure guarantees a 99.99% Service Level Agreement (SLA) for VMs.
 
 ### What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?
 
  A vm scale set allows you to automatically create and manage a group of identical, load-balanced VMs. It’s designed to automatically scale in response to demand.
 
-Horizontal scaling:
-
-Scale Out: This adds more instances of virtual machines (VMs) to handle increased demand.
+***Horizontal scaling:-***
+Scale Out: This adds more instances of the same VM to handle increased demand.
 
 Scale In: This reduces the number of VM instances when the demand decreases.
  
-Vertical scaling:
-
+***Vertical scaling:-***
 Scale Up: This increases the resources (CPU, memory, disk) allocated to the existing VMs without changing the number of instances.
 
 Scale Down: This decreases the resources allocated to the VMs when the high-performance requirements are no longer necessary.
 
-## Securing the DB with a DMZ subnet
+----
+
+<br>
+
+## Securing the DB with a DMZ subnet- 3 subnet vnet
 
  Our private subnet currently doesn't have anymore security than our public
 
+#### Quick increase of db w/o nva
  current subnet allows communication between vms in the same subnet
-  - if add a nsg rule that stops this
-  - you must then allow db vm to allow communication from the MONGODB database by allowing traffic from it's port - (27017)
-  - by default vnet comms is not allowed 
+
+ - Delete the the public IP of the db vm
+  - add a nsg rule that stops this- disallow any traffic 
+    - you must then allow db vm to allow communication from the MONGODB database by allowing traffic from it's port - (27017)
+  - by default vnet comms is not allowed anymore
 
 if you just delete your public ip for your db subnet then you can ssh in through a public vm and ssh into your priv vm- you must include port and have the private key for the private vm on your public vm
 
@@ -883,6 +899,8 @@ nva (network virtual appliance) - filters any traffic that wants to access to th
  - and then the forwarded (filtered) traffic goes to the private subnet that and therefore the db vm
 ![alt text](<images/3 subnet diagram.png>)
 
+
+
 ### Steps for Code-along
 1. set up a new vnet - 3 subnet version
    1.  create 3 subnets and name then appropriately
@@ -894,12 +912,13 @@ nva (network virtual appliance) - filters any traffic that wants to access to th
 1. Create db vm from image
    1. go to your ready-to-run-db image 
    2. create a vm 
-   3. name appropriately ![alt text](<images/3 vnet 1.png>)
+   3. name appropriately ![alt text](<images/3 vnet 1.png>) 
    4. for availability- self select and db in zone 3
    5. allow ssh (for now)
    6. disk as normal
    7. networking - choose the right vnet and subnet, no public ip
    ![alt text](<images/3 vnet 2.png>)
+   8. add tags
 2. Create the app vm from image
    1. go to your ready-to-run-app image 
    2. create a vm 
@@ -908,6 +927,7 @@ nva (network virtual appliance) - filters any traffic that wants to access to th
    5. allow http and ssh
    6. disk as normal
    7. networking - choose the right vnet (3 subnet vnet) and subnet (public)
+   8. add run app user data
 3. Create NVA vm
    1. create with ramons's clean image image
    2. name
@@ -927,17 +947,76 @@ nva (network virtual appliance) - filters any traffic that wants to access to th
    1. search route table on az
    2. create
    ![alt text](<images/3vnet 4.png>)
-   1. go to resources
-   2. add a route 
-   3. name it 
-   4. the destination type is IP addresses
-   5. the final destination is our private db vm so put that IP range there
-   6. the next hop type is virtual appliance - our NVA
-   7. the next hop address is the private IP of the DMZ subnet
-  ![alt text](<images/3 vnet 5.png>)
-  1.  Associate the route with where the info will be coming from - our public IP address
-  2.  go to subnets on the side menu
-  3.  add associate
-  4.  fill in like so
-![alt text](<images/3 vnet 6.png>)
-  1.  if you check the git bash window with the ping, you can see the app has stopped receiving packets because we've sent traffic to our NVA machine the traffic hasn't been forwarded to DB machine
+   3. go to resources
+   4. add a route 
+   5. name it 
+   6. the destination type is IP addresses
+   7. the final destination is our private db vm so put that IP range there
+   8. the next hop type is virtual appliance - our NVA
+   9. the next hop address is the private IP of the DMZ subnet
+   ![alt text](<images/3 vnet 5.png>)
+   10. Associate the route with where the info will be coming from - our public IP address
+   11. go to subnets on the side menu
+   12. add associate - the public subnet (app)
+   13. fill in like so
+   ![alt text](<images/3 vnet 6.png>)
+   14. if you check the git bash window with the ping, you can see the app has stopped receiving packets because we've sent traffic to our NVA machine the traffic hasn't been forwarded to DB machine
+   15. click network setting on your nva vm- click the link in bold
+   ![alt text](images/nva-image.png)
+   16. Now we are in the Ip setting for the vm
+   17. enable Ip forwarding - now it is done on AZ
+   ![alt text](images/nva-image-1.png)
+   18. click apply
+   19. ssh into your nva vm on gitbash
+   20. to enable IP forwarding - you should check first ```sysctl net.ipv4.ip_forward```
+   21. 0=false, 1=true
+   22. nano into the system control config ```sudo nano /etc/sysctl.conf```
+   23. follow the uncomment line to allow ipv4 forwarding
+   
+   ![alt text](images/nva-image-3.png)
+
+   24. once you change a config file- you must reload it to allow it to being working ``` sudo sysctl -p```
+   
+   ![alt text](images/nva-image-4.png)
+
+   25. ping should start working again on your app bash window as the nva vm is now forwarding the packets to the db vm - post page should also be working again
+6. IP table rules script
+   1. run update and upgrade packages -[prov-app-bash-script](BASH_scripts/prov-app.sh)
+   2. create a script on the nva vm
+   3. ```nano config-ip-tables.sh```
+   4. add comments to ramons script
+   [config-ip-table-script](BASH_scripts/config-ip-tables.sh)
+   5. **BE CAREFUL WHEN WRITING YOUR RULES, IF YOU SET UP WRONG, YOU'LL LOCK YOURSELF OUT OF YOUR VM**
+   6. change permissions to allow you to run the script ```chmod +x config-ip-tables.sh```
+   7. run the script```./config-ip-tables.sh```
+   8. now the rules are persistent, so if the nva vm is restarted then the rules (firewall) is automatically working
+7. set up the nsg rules for your db vm
+   1.  go to network setting
+   2.  scroll down to see the rules
+     ![alt text](images/nva-image-5.png)
+   3.  add an inbound rule- to allow mongo db
+       1.  can specify the source as the app vm ip
+       2.  but cannot if theres scaling (multiple vm)
+       3.  **therefore specify the public subnet IP address**
+       4.  destination is any
+       5.  service is MONGODB and add
+       ![alt text](images/nva-image-6.png)
+    4. add an inbound rule -to deny everything else
+       1. source - any
+       2. destination - any
+       3. destination port ranges - *
+       4. action - deny
+       5. priority - 500
+   
+      ![alt text](images/nva-image-7.png)
+8. Clean up
+   1. go to resource group
+   2. search name
+   3. delete everything but images, subnets and ssh key
+   4. to delete route table - dissociate it from any subnets
+
+***[If you want to get the app "talking" to the db without the route/route table you can disassociate the public ip from the route]***
+
+# AWS
+
+**As soon as you log in, change your region to Ireland**

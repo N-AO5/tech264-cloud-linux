@@ -1,10 +1,8 @@
 #!/bin/bash
  
- 
-MONGODB_HOST="mongodb://10.0.3.5:27017/posts"
- 
+  
 echo "Connect via our VMs via IP."
-export DB_HOST=$MONGODB_HOST
+export DB_HOST="mongodb://10.0.4.4:27017/posts"
 echo "Connection complete."
 printenv DB_HOST
 echo "env variable set."
