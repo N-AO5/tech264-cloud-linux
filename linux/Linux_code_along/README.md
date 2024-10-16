@@ -1018,5 +1018,93 @@ nva (network virtual appliance) - filters any traffic that wants to access to th
 ***[If you want to get the app "talking" to the db without the route/route table you can disassociate the public ip from the route]***
 
 # AWS
-
 **As soon as you log in, change your region to Ireland**
+
+# Blob storage (on AZ)
+A blob can easily store very large amounts of data, though quite disorganized. 
+
+Can be used for storing all kinds of file, scalable, cost effective. 
+
+Can be hard to find the blob you need but you CAN use folders to organize
+
+redundancy is AUTOMATICALLY BUILT IN - LRS (locally redundant storage), stores 3 copies locally in the same availability zone (data centre), though you can store copies in other availability zones but you need to choose it and its more expensive
+
+### Code along
+[Go to: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli]
+- Create a test blob storage VM using your app image - remember to add the run app user data
+- SSH into your app vm and install Azure CLI ```curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash``` 
+- log into AZURE CLI ```az login```
+- copy the website url
+- follow the prompt and paste the code into the authenticator 
+  ![alt text](image.png)
+- select your subscription (ours is azure training)
+- ```az group list``
+- Create a storage account -
+ ```
+ az storage account create --name tech264anjystorage --resource-group tech264 --location uksouth --sku Standard_LRS
+ ```
+ - to check what storage accounts exist?
+
+  ```az storage account list --resource-group tech264``` - json format
+
+
+  ```az storage account list --resource-group tech264 --query "[].{Name:name, Location:location, Kind:kind}" --output table``` - table format
+- Create a container - you dont have to use the back slashes (they mean continue to the next line)
+```
+az storage container create \
+    --account-name tech264anjystorage \
+    --name testcontainer \
+    --auth-mode login
+```
+- to delete a container
+```
+  az storage container create \
+    --account-name tech264anjystorage \
+    --name  \
+    --auth-mode lotestcontainergin
+```
+- to list containers in your storage account 
+```
+az storage container list \
+    --account-name tech264anjystorage \
+    --output table \
+    --auth-mode login
+```
+- put a blog in the container 
+- we will add a text file ```nano test.txt```
+- now to upload the blob 
+    - add your account name 
+    - add your container name
+    - the name is the name of the blob on the cloud
+    - the file is the name of the file/blob that you wanna upload
+```
+  az storage blob upload \
+    --account-name tech264anjystorage \
+    --container-name testcontainer \
+    --name newname.txt \
+    --file test.txt \
+    --auth-mode login
+```
+- list your blob 
+```
+az storage blob list \
+    --account-name tech264anjystorage \
+    --container-name testcontainer \
+    --output table \
+    --auth-mode login
+```
+
+- find your blob on AZURE
+  - search storage accounts 
+  - go to settings on the side menu, click configuration
+  - enable blob anonymous access
+  ![alt text](image-2.png)
+  - save 
+  - go to data storage-> containers in the side menu
+  - click your container
+  - allow public access
+  - click your blob
+  - copy the url and paste to see the contents of your blob
+  - to delete: 
+    - go to resources 
+    - select and delete
