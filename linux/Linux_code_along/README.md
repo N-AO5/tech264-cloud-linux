@@ -1036,7 +1036,7 @@ redundancy is AUTOMATICALLY BUILT IN - LRS (locally redundant storage), stores 3
 - log into AZURE CLI ```az login```
 - copy the website url
 - follow the prompt and paste the code into the authenticator 
-  ![alt text](image.png)
+  ![alt text](images/blobimage.png)
 - select your subscription (ours is azure training)
 - ```az group list``
 - Create a storage account -
@@ -1053,7 +1053,7 @@ redundancy is AUTOMATICALLY BUILT IN - LRS (locally redundant storage), stores 3
 ```
 az storage container create \
     --account-name tech264anjystorage \
-    --name testcontainer \
+    --name images \
     --auth-mode login
 ```
 - to delete a container
@@ -1098,7 +1098,7 @@ az storage blob list \
   - search storage accounts 
   - go to settings on the side menu, click configuration
   - enable blob anonymous access
-  ![alt text](image-2.png)
+![alt text](images/blobimage-2.png)
   - save 
   - go to data storage-> containers in the side menu
   - click your container
@@ -1108,3 +1108,22 @@ az storage blob list \
   - to delete: 
     - go to resources 
     - select and delete
+
+## for the task
+- download a cat picture 
+  ``` curl -o downloadedcat.jpg *cat url*```
+- create your container called images
+```
+az storage blob upload \
+    --account-name tech264anjystorage \
+    --container-name images \
+    --name uploadedcat.jpg \
+    --file downloadedcat.jpg \
+    --auth-mode login
+```
+- allow permission on Azure to so the blob url can be seen by the public
+- cd into app repo and nano into the index file ```cd /repo/app/views``` ```sudo nano index.ejs```
+- change the image jpg to the url of your blob 
+ ![alt text](images/blobimage-3.png)
+- on your app ip, the image should have changes
+  ![alt text](images/blobimage-4.png)
