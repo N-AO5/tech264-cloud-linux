@@ -1,66 +1,8 @@
+- [AWS](#aws)
+- [Blob storage (on AZ)](#blob-storage-on-az)
+    - [Code along](#code-along)
+  - [for the task](#for-the-task)
 
-
-- [What is Linux?](#what-is-linux)
-- [Linux Commands](#linux-commands)
-- [Navigating Files and Folders](#navigating-files-and-folders)
-  - [Installing a package \[FIRST THING TO DO WHEN U OPEN YOUR VM\]](#installing-a-package-first-thing-to-do-when-u-open-your-vm)
-  - [Running Multiple Commands as the Super User](#running-multiple-commands-as-the-super-user)
-- [Making a shell (BASH) Script](#making-a-shell-bash-script)
-- [Environment Variables](#environment-variables)
-    - [Set a Variable (for a script)](#set-a-variable-for-a-script)
-    - [Set an Environment Variable](#set-an-environment-variable)
-    - [Set a Persistent Variable](#set-a-persistent-variable)
-      - [Option 1](#option-1)
-      - [Option 2- avoid having to ssh in and out to reload the .bashrc file](#option-2--avoid-having-to-ssh-in-and-out-to-reload-the-bashrc-file)
-- [Managing Processes](#managing-processes)
-  - [User Processes](#user-processes)
-  - [System Processes](#system-processes)
-    - [Running a Process](#running-a-process)
-    - [Killing a Process](#killing-a-process)
-- [New VM to run the app](#new-vm-to-run-the-app)
-  - [Test your code before creating a script](#test-your-code-before-creating-a-script)
-  - [Install dependency (for our app)](#install-dependency-for-our-app)
-  - [move the scp (secure copy) to copy app folder into the home direc of the VM (app)](#move-the-scp-secure-copy-to-copy-app-folder-into-the-home-direc-of-the-vm-app)
-  - [move git/git clone to copy app folder into the home  direc of the VM (app)](#move-gitgit-clone-to-copy-app-folder-into-the-home--direc-of-the-vm-app)
-  - [How to get the app running manually](#how-to-get-the-app-running-manually)
-- [Create another VM for app database](#create-another-vm-for-app-database)
-- [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
-- [Task: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
-- [Task: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
-- [Task: How many services can use a port](#task-how-many-services-can-use-a-port)
-- [Task: Reverse proxy - would be in app script (after the install nginx file)](#task-reverse-proxy---would-be-in-app-script-after-the-install-nginx-file)
-- [VM security](#vm-security)
-- [Task: Run Sparta app in the background - using pm2](#task-run-sparta-app-in-the-background---using-pm2)
-    - [What is pm2](#what-is-pm2)
-    - [How to used pm2](#how-to-used-pm2)
-- [Task: Automate configuration of nginx reverse proxy](#task-automate-configuration-of-nginx-reverse-proxy)
-- [Task: User data \& restarting the app vm](#task-user-data--restarting-the-app-vm)
-- [Levels of automation- Deploying out app on the cloud](#levels-of-automation--deploying-out-app-on-the-cloud)
-  - [Create an new VM using Ramon's image](#create-an-new-vm-using-ramons-image)
-  - [Create an image for our virtual machines](#create-an-image-for-our-virtual-machines)
-- [Monitoring and Alert management](#monitoring-and-alert-management)
-    - [How can you increase the management of a vm crash](#how-can-you-increase-the-management-of-a-vm-crash)
-    - [Types of scaling](#types-of-scaling)
-- [Test Monitoring](#test-monitoring)
-    - [Create a dashboard](#create-a-dashboard)
-    - [Now for some load testing](#now-for-some-load-testing)
-- [Azure VM Scale Set (aka Auto scaling on AWS)](#azure-vm-scale-set-aka-auto-scaling-on-aws)
-    - [AZ VM scale set architecture](#az-vm-scale-set-architecture)
-    - [How to make a scale set](#how-to-make-a-scale-set)
-    - [Documentation about load balancers](#documentation-about-load-balancers)
-- [Task: Azure Monitoring \& Alert Management](#task-azure-monitoring--alert-management)
-    - [What is worst to best in terms of monitoring and responding to load/traffic.](#what-is-worst-to-best-in-terms-of-monitoring-and-responding-to-loadtraffic)
-    - [How you setup a dashboard](#how-you-setup-a-dashboard)
-    - [How a combination of load testing and the dashboard helped us](#how-a-combination-of-load-testing-and-the-dashboard-helped-us)
-    - [Create a CPU usage alert for your app instance → you should get a notification sent your email](#create-a-cpu-usage-alert-for-your-app-instance--you-should-get-a-notification-sent-your-email)
-    - [Removing Dashboard, Alerts, and Action groups](#removing-dashboard-alerts-and-action-groups)
-- [Task: Research VM availability options on Azure](#task-research-vm-availability-options-on-azure)
-    - [What is an availability set? How do they work? Advantages/disadvantages?](#what-is-an-availability-set-how-do-they-work-advantagesdisadvantages)
-    - [What is an availability zone? Why superior to an availability set? Disadvantages?](#what-is-an-availability-zone-why-superior-to-an-availability-set-disadvantages)
-  - [What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?](#what-is-a-virtual-machine-scale-set-what-type-of-scaling-does-it-do-how-does-it-work-limitations)
-- [Securing the DB with a DMZ subnet- 3 subnet vnet](#securing-the-db-with-a-dmz-subnet--3-subnet-vnet)
-    - [Quick increase of db w/o nva](#quick-increase-of-db-wo-nva)
-  - [Steps for Code-along](#steps-for-code-along)
 
 ## What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
@@ -1031,47 +973,47 @@ redundancy is AUTOMATICALLY BUILT IN - LRS (locally redundant storage), stores 3
 
 ### Code along
 [Go to: https://learn.microsoft.com/en-us/cli/azure/install-azure-cli]
-- Create a test blob storage VM using your app image - remember to add the run app user data
-- SSH into your app vm and install Azure CLI ```curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash``` 
-- log into AZURE CLI ```az login```
-- copy the website url
-- follow the prompt and paste the code into the authenticator 
+1. Create a test blob storage VM using your app image - remember to add the run app user data
+2. SSH into your app vm and install Azure CLI ```curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash``` 
+3. log into AZURE CLI ```az login```
+4. copy the website url
+5. follow the prompt and paste the code into the authenticator 
   ![alt text](images/blobimage.png)
-- select your subscription (ours is azure training)
-- ```az group list``
-- Create a storage account -
+6. select your subscription (ours is azure training)
+7. ```az group list``
+8. Create a storage account -
  ```
  az storage account create --name tech264anjystorage --resource-group tech264 --location uksouth --sku Standard_LRS
  ```
- - to check what storage accounts exist?
+ 9. to check what storage accounts exist?
 
   ```az storage account list --resource-group tech264``` - json format
 
 
   ```az storage account list --resource-group tech264 --query "[].{Name:name, Location:location, Kind:kind}" --output table``` - table format
-- Create a container - you dont have to use the back slashes (they mean continue to the next line)
+10. Create a container - you dont have to use the back slashes (they mean continue to the next line)
 ```
 az storage container create \
     --account-name tech264anjystorage \
     --name images \
     --auth-mode login
 ```
-- to delete a container
+11. to delete a container
 ```
   az storage container create \
     --account-name tech264anjystorage \
     --name  \
     --auth-mode lotestcontainergin
 ```
-- to list containers in your storage account 
+12. to list containers in your storage account 
 ```
 az storage container list \
     --account-name tech264anjystorage \
     --output table \
     --auth-mode login
 ```
-- put a blog in the container 
-- we will add a text file ```nano test.txt```
+13. put a blog in the container 
+14. we will add a text file ```nano test.txt```
 - now to upload the blob 
     - add your account name 
     - add your container name
@@ -1085,7 +1027,7 @@ az storage container list \
     --file test.txt \
     --auth-mode login
 ```
-- list your blob 
+15. list your blob 
 ```
 az storage blob list \
     --account-name tech264anjystorage \
@@ -1094,7 +1036,7 @@ az storage blob list \
     --auth-mode login
 ```
 
-- find your blob on AZURE
+16. find your blob on AZURE
   - search storage accounts 
   - go to settings on the side menu, click configuration
   - enable blob anonymous access
@@ -1110,9 +1052,9 @@ az storage blob list \
     - select and delete
 
 ## for the task
-- download a cat picture 
+1. download a cat picture 
   ``` curl -o downloadedcat.jpg *cat url*```
-- create your container called images
+2. create your container called images
 ```
 az storage blob upload \
     --account-name tech264anjystorage \
@@ -1121,9 +1063,9 @@ az storage blob upload \
     --file downloadedcat.jpg \
     --auth-mode login
 ```
-- allow permission on Azure to so the blob url can be seen by the public
-- cd into app repo and nano into the index file ```cd /repo/app/views``` ```sudo nano index.ejs```
-- change the image jpg to the url of your blob 
+3. allow permission on Azure to so the blob url can be seen by the public
+4. cd into app repo and nano into the index file ```cd /repo/app/views``` ```sudo nano index.ejs```
+5. change the image jpg to the url of your blob 
  ![alt text](images/blobimage-3.png)
-- on your app ip, the image should have changes
+6. on your app ip, the image should have changes
   ![alt text](images/blobimage-4.png)
