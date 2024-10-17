@@ -1,10 +1,75 @@
+- [What is Linux?](#what-is-linux)
+- [Linux Commands](#linux-commands)
+  - [Navigating Files and Folders](#navigating-files-and-folders)
+    - [Installing a package \[FIRST THING TO DO WHEN U OPEN YOUR VM\]](#installing-a-package-first-thing-to-do-when-u-open-your-vm)
+    - [Running Multiple Commands as the Super User](#running-multiple-commands-as-the-super-user)
+  - [Making a shell (BASH) Script](#making-a-shell-bash-script)
+  - [Environment Variables](#environment-variables)
+      - [Set a Variable (for a script)](#set-a-variable-for-a-script)
+      - [Set an Environment Variable](#set-an-environment-variable)
+      - [Set a Persistent Variable](#set-a-persistent-variable)
+        - [Option 1](#option-1)
+        - [Option 2- avoid having to ssh in and out to reload the .bashrc file](#option-2--avoid-having-to-ssh-in-and-out-to-reload-the-bashrc-file)
+  - [Managing Processes](#managing-processes)
+    - [User Processes](#user-processes)
+    - [System Processes](#system-processes)
+      - [Running a Process](#running-a-process)
+      - [Killing a Process](#killing-a-process)
+  - [New VM to run the app](#new-vm-to-run-the-app)
+    - [Test your code before creating a script](#test-your-code-before-creating-a-script)
+    - [Install dependency (for our app)](#install-dependency-for-our-app)
+    - [move the scp (secure copy) to copy app folder into the home direc of the VM (app)](#move-the-scp-secure-copy-to-copy-app-folder-into-the-home-direc-of-the-vm-app)
+    - [move git/git clone to copy app folder into the home  direc of the VM (app)](#move-gitgit-clone-to-copy-app-folder-into-the-home--direc-of-the-vm-app)
+    - [How to get the app running manually](#how-to-get-the-app-running-manually)
+  - [Create another VM for app database](#create-another-vm-for-app-database)
+  - [Now to connect app VM to db VM](#now-to-connect-app-vm-to-db-vm)
+  - [Task: Stage 1, Create a provisions script to run app in the background](#task-stage-1-create-a-provisions-script-to-run-app-in-the-background)
+  - [Task: stage 2, Create a provisions script for mongo DB](#task-stage-2-create-a-provisions-script-for-mongo-db)
+  - [Task: How many services can use a port](#task-how-many-services-can-use-a-port)
+  - [Task: Reverse proxy - would be in app script (after the install nginx file)](#task-reverse-proxy---would-be-in-app-script-after-the-install-nginx-file)
+  - [VM security](#vm-security)
+  - [Task: Run Sparta app in the background - using pm2](#task-run-sparta-app-in-the-background---using-pm2)
+      - [What is pm2](#what-is-pm2)
+      - [How to used pm2](#how-to-used-pm2)
+  - [Task: Automate configuration of nginx reverse proxy](#task-automate-configuration-of-nginx-reverse-proxy)
+  - [Task: User data \& restarting the app vm](#task-user-data--restarting-the-app-vm)
+  - [Levels of automation- Deploying out app on the cloud](#levels-of-automation--deploying-out-app-on-the-cloud)
+    - [Create an new VM using Ramon's image](#create-an-new-vm-using-ramons-image)
+    - [Create an image for our virtual machines](#create-an-image-for-our-virtual-machines)
+  - [Monitoring and Alert management](#monitoring-and-alert-management)
+      - [How can you increase the management of a vm crash](#how-can-you-increase-the-management-of-a-vm-crash)
+      - [Types of scaling](#types-of-scaling)
+  - [Test Monitoring](#test-monitoring)
+      - [Create a dashboard](#create-a-dashboard)
+      - [Now for some load testing](#now-for-some-load-testing)
+  - [Azure VM Scale Set (aka Auto scaling on AWS)](#azure-vm-scale-set-aka-auto-scaling-on-aws)
+      - [AZ VM scale set architecture](#az-vm-scale-set-architecture)
+      - [How to make a scale set](#how-to-make-a-scale-set)
+      - [Documentation about load balancers](#documentation-about-load-balancers)
+  - [Task: Azure Monitoring \& Alert Management](#task-azure-monitoring--alert-management)
+      - [What is worst to best in terms of monitoring and responding to load/traffic.](#what-is-worst-to-best-in-terms-of-monitoring-and-responding-to-loadtraffic)
+      - [How you setup a dashboard](#how-you-setup-a-dashboard)
+      - [How a combination of load testing and the dashboard helped us](#how-a-combination-of-load-testing-and-the-dashboard-helped-us)
+      - [Create a CPU usage alert for your app instance → you should get a notification sent your email](#create-a-cpu-usage-alert-for-your-app-instance--you-should-get-a-notification-sent-your-email)
+      - [Removing Dashboard, Alerts, and Action groups](#removing-dashboard-alerts-and-action-groups)
+  - [Task: Research VM availability options on Azure](#task-research-vm-availability-options-on-azure)
+      - [What is an availability set? How do they work? Advantages/disadvantages?](#what-is-an-availability-set-how-do-they-work-advantagesdisadvantages)
+      - [What is an availability zone? Why superior to an availability set? Disadvantages?](#what-is-an-availability-zone-why-superior-to-an-availability-set-disadvantages)
+    - [What is a Virtual Machine Scale Set? What type of scaling does it do? How does it work? Limitations?](#what-is-a-virtual-machine-scale-set-what-type-of-scaling-does-it-do-how-does-it-work-limitations)
+  - [Securing the DB with a DMZ subnet- 3 subnet vnet](#securing-the-db-with-a-dmz-subnet--3-subnet-vnet)
+      - [Quick increase of db w/o nva](#quick-increase-of-db-wo-nva)
+    - [Steps for Code-along](#steps-for-code-along)
 - [AWS](#aws)
 - [Blob storage (on AZ)](#blob-storage-on-az)
     - [Code along](#code-along)
   - [for the task](#for-the-task)
 
 
-## What is Linux?
+
+
+
+
+# What is Linux?
 - Linux is a clone of UNIX os, used to be used on large mainframes 
 - We're using linux for it flexibility, cheaper price, stable os, scales up very easily.
   - Often used for DevOps
@@ -18,7 +83,7 @@
 - ubuntu is just one distribution (like one flavour/version of linux)
 - BASH is a shell interprets the linux commands 
 - 
-## Linux Commands
+# Linux Commands
 - ```ls```lists the files and direc
 - ``` cd``` followed by the name of the direc to open a direc
 - ```ls -a``` lists hidden files too
